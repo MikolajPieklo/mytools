@@ -1,0 +1,19 @@
+How to unlock memory protection
+   run: openocd -f interface/stlink.cfg -f target/stm32f1x.cfg
+   open telnet connection localhost:4444
+   > halt
+   > flash probe 0
+   > reset init
+   > stm32f1x unlock 0
+
+linkermap
+   linkermap TARGET.map
+
+sudo apt install stlink-tools
+
+#######
+clang-tidy
+#######
+sudo apt install bear
+run: bear -- make
+run: clang-tidy Core/src/*.c

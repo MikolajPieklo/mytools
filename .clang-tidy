@@ -1,0 +1,25 @@
+---
+Checks: >
+   -*,
+   readability-magic-numbers,            # Ostrzeżenie o magicznych liczbach
+   readability-function-size,            # Ostrzeżenie przy dużych funkcjach
+   performance-inefficient-vector-operation, # Nieskuteczne operacje na wektorach
+   portability-simd-intrinsics,          # Specyficzne dla nieprzenośnych funkcji SIMD
+   cert-msc30-c,                         # Potencjalne ryzyko wyścigów danych
+   cert-err34-c                          # Wykrywanie błędów konwersji danych
+   clang-analyzer-core.NullDereference,   # Wykrywanie dereferencji wskaźników NULL
+   clang-analyzer-security.FloatLoopCounter,  # Ostrzeżenie o licznikach pętli zmiennoprzecinkowych
+   clang-analyzer-security.insecureAPI.strcpy, # Ostrzeżenie przed niebezpiecznymi funkcjami jak strcpy
+   bugprone-branch-clone,                # Duplikacja logiki w blokach warunkowych
+   bugprone-integer-division,            # Problemy z dzieleniem liczb całkowitych
+
+ExtraArgs: [
+   "--target=arm-none-eabi",
+   "-isystem", "/home/mkpk/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi/arm-none-eabi/include",
+   "--sysroot=/home/mkpk/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi"
+]
+
+WarningsAsErrors: ''
+HeaderFilterRegex: ''
+
+# -* oznacza wylacz wszystkie funkcje sprawdzajace

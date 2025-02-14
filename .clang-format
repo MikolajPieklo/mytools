@@ -1,0 +1,139 @@
+# disable formatting with // clang-format off
+# enable formatting with  // clang-format on
+
+Language: Cpp
+Standard: Cpp11
+
+# --- Indentation
+
+TabWidth: 3
+
+UseTab: Never
+
+IndentCaseLabels: false
+
+IndentWidth: 3
+
+IndentWrappedFunctionNames: false
+
+ConstructorInitializerIndentWidth: 4
+
+ContinuationIndentWidth: 4
+
+AccessModifierOffset: -4 # how far e.g public is indented
+
+NamespaceIndentation: None
+
+# --- Braces
+
+BreakBeforeBraces: Custom
+
+BraceWrapping: {
+    AfterClass: 'true'
+    AfterControlStatement: 'true'
+    AfterEnum : 'true'
+    AfterFunction : 'true'
+    AfterNamespace : 'false'
+    AfterStruct : 'true'
+    AfterUnion : 'true'
+    BeforeCatch : 'false'
+    BeforeElse : 'true'
+    IndentBraces : 'false'
+    SplitEmptyFunction : 'true'
+    SplitEmptyRecord : 'false'
+    SplitEmptyNamespace : 'false'
+}
+
+AllowShortBlocksOnASingleLine: false # if (1) {return;}
+
+AllowShortCaseLabelsOnASingleLine: false # case: break;
+
+AllowShortFunctionsOnASingleLine: false # None, Empty, Inline
+
+AllowShortIfStatementsOnASingleLine: false
+
+AllowShortLoopsOnASingleLine: false
+
+Cpp11BracedListStyle: true
+
+# --- Whitespace
+
+SpaceBeforeAssignmentOperators: true
+
+SpaceBeforeParens: ControlStatements
+
+SpaceInEmptyParentheses: false
+
+SpacesBeforeTrailingComments: 1
+
+SpacesInAngles: false
+
+SpacesInCStyleCastParentheses: false
+
+SpacesInParentheses: false
+
+SpacesInSquareBrackets: false
+
+SpaceAfterCStyleCast: true
+
+MaxEmptyLinesToKeep: 3
+
+# --- Breaks, alignment & reflow
+
+PenaltyBreakBeforeFirstCallParameter: 200
+
+AlignAfterOpenBracket: Align
+
+AlignConsecutiveAssignments: false
+
+AlignConsecutiveDeclarations: true
+
+AlignEscapedNewlinesLeft: true
+
+AlignOperands: false
+
+AlignTrailingComments: true
+
+AllowAllParametersOfDeclarationOnNextLine: false
+
+AlwaysBreakAfterReturnType: None
+
+AlwaysBreakBeforeMultilineStrings: true
+
+AlwaysBreakTemplateDeclarations: true
+
+BinPackArguments: true
+
+BinPackParameters: true
+
+BreakBeforeBinaryOperators: NonAssignment
+
+BreakBeforeTernaryOperators: false
+
+BreakConstructorInitializersBeforeComma: true
+
+ColumnLimit: 100
+
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+
+PointerAlignment: Right
+
+ReflowComments: true
+
+# --- Other
+InsertBraces: true
+
+AlignConsecutiveMacros : true
+
+SortIncludes: true
+IncludeBlocks: Regroup
+SeparateDefinitionBlocks: Always
+IncludeCategories:
+    - Regex: '^"*.h*"'
+      Priority: 1
+    - Regex: '^<std[^>]*>'
+      Priority: 2
+    - Regex: '^<stm32[^>]*>'
+      Priority: 3
+    - Regex: '.*'
+      Priority: 4

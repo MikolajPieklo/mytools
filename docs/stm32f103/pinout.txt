@@ -1,0 +1,35 @@
+A0                      B0  - Lora_AUX         C13 - Lora_M0
+A1                      B1  - Lora_M1
+A2  - UART_TX2          B2  - BOOT1 (pin not used)
+A3  - UART_RX2          B3
+A4  - CS                B4  - RST
+A5  - SPI1_SCK          B5  - RS
+A6  - SPI1_MISO         B6  - GDO2
+A7  - SPI1_MOSI         B7  - GDO0
+A8                      B8
+A9  - UART_TX1          B9
+A10 - UART_RX1          B10 - I2C_SCL2 *
+A11                     B11 - I2C_SDA2 *
+A12                     B12 - LED
+A13 - SWDIO             B13 - SPI2_SCK
+A14 - SWCLK             B14
+A15                     B15 - SPI2_MOSI
+
+
+B12 - LED               B11 - I2C_SDA2 *
+B13 - SPI2_SCK          B10 - I2C_SCL2 *
+B14                     B1  - Lora_M1
+B15 - SPI2_MOSI         B0  - Lora_AUX
+A8                      A7  - SPI1_MOSI
+A9  - UART_TX1          A6  - SPI1_MISO
+A10 - UART_RX1          A5  - SPI1_SCK
+A11                     A4  - CS1 (CC11)
+A12                     A3  - UART_RX2
+A15                     A2  - UART_TX2
+B3                      A1  - CS2 (W25Q)
+B4    RST               A0
+B5    RS                RST
+B6  - GDO2              C13 - Lora_M0
+B7  - GDO0              B9
+V3                      B8
+V5                      G
