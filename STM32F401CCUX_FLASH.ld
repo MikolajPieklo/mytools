@@ -76,6 +76,16 @@ SECTIONS
     _etext = .;        /* define a global symbols at end of code */
   } >FLASH
 
+  .program_info_section :
+  {
+    . = ALIGN(4);
+    _sprogram_info_section = .;
+    *(.info_section)
+    *(.info_section*)
+    . = ALIGN(4);
+    _eprogram_info_section = .;
+  } >FLASH
+
   /* Constant data into "FLASH" Rom type memory */
   .rodata :
   {
@@ -161,16 +171,6 @@ SECTIONS
     _ebss = .;         /* define a global symbol at bss end */
     __bss_end__ = _ebss;
   } >RAM
-
-  . = ALIGN(4);
-  .info_section :
-  {
-    _sinfo_section = .;
-    *(.info_section)
-    *(.info_section*)
-    . = ALIGN(4);
-    _einfo_section = .;
-  } >FLASH
 
   /* User_heap_stack section, used to check that there is enough "RAM" Ram  type memory left */
   ._user_heap_stack :
