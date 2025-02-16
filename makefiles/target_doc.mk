@@ -1,0 +1,5 @@
+
+.PHONY: DOC
+
+DOC:
+	doxygen

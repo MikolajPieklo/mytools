@@ -27,7 +27,7 @@ fi
 
 openocd -f /usr/share/openocd/scripts/interface/stlink.cfg \
         -c "hla_serial $serial" \
-        -f /usr/share/openocd/scripts/target/stm32f1x.cfg \
+        -f /usr/share/openocd/scripts/target/$1.cfg \
         -c "program out/target.elf verify reset exit"
 
 
