@@ -12,9 +12,17 @@
  ************************************/
 #include "hw_monitor.h"
 
+#ifdef STM32F103xB
 #include <stm32f1xx.h>
 #include <stm32f1xx_ll_bus.h>
 #include <stm32f1xx_ll_pwr.h>
+#elif STM32F401xC
+#include <stm32f4xx.h>
+#include <stm32f4xx_ll_bus.h>
+#include <stm32f4xx_ll_pwr.h>
+#else
+#error Module not supported!
+#endif
 
 /************************************
  * EXTERN VARIABLES
@@ -64,4 +72,3 @@ void HW_PVD_Start(void)
    NVIC_EnableIRQ(PVD_IRQn);
    LL_PWR_EnablePVD();
 }
-

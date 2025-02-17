@@ -14,8 +14,15 @@
 
 #include <stdbool.h>
 
+#ifdef STM32F103xB
 #include <stm32f1xx_ll_bus.h>
 #include <stm32f1xx_ll_tim.h>
+#elif STM32F401xC
+#include <stm32f4xx_ll_bus.h>
+#include <stm32f4xx_ll_tim.h>
+#else
+#error Module not supported!
+#endif
 
 /************************************
  * EXTERN VARIABLES
@@ -75,9 +82,6 @@ void TS_Delay_ms(uint32_t delay_ms)
 
 void TS_Delay_us_Init(void)
 {
-   uint32_t InitialAutoreload = 0;
-   uint32_t TimOutClock = 1;
-
    /* Enable the timer peripheral clock */
    LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM4);
 

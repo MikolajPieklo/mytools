@@ -16,10 +16,20 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#ifdef STM32F103xB
 #include <stm32f1xx_ll_bus.h>
 #include <stm32f1xx_ll_crc.h>
 #include <stm32f1xx_ll_rcc.h>
 #include <stm32f1xx_ll_utils.h>
+#elif STM32F401xC
+#include <stm32f4xx_ll_bus.h>
+#include <stm32f4xx_ll_crc.h>
+#include <stm32f4xx_ll_rcc.h>
+#include <stm32f4xx_ll_utils.h>
+#else
+#error Module not supported!
+#endif
+
 
 /************************************
  * EXTERN VARIABLES
@@ -120,9 +130,9 @@ void Device_Info(void)
    printf("Device ID: 0x%lx 0x%lx 0x%lx\r\n", LL_GetUID_Word0(), LL_GetUID_Word1(),
           LL_GetUID_Word2());
    check_restart_issues();
-   printf("Flash size: %dKB\r\n", LL_GetFlashSize());
+   printf("Flash size: %ldKB\r\n", LL_GetFlashSize());
    printf("Program size: 0x%lx\r\n", text_size);
-   printf("Flash usage: %\r\n");
+   printf("Flash usage: \r\n");
    printf("Flash crc32: 0x%lx\r\n", program_info.text_sec_crc32);
    printf("Calculated crc32: 0x%lx\r\n", LL_CRC_ReadData32(CRC));
    printf("Build time: \r\n");

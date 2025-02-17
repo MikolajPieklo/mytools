@@ -19,7 +19,13 @@ extern "C" {
  ************************************/
 #include <stdint.h>
 
+#ifdef STM32F103xB
 #include <stm32f1xx_ll_usart.h>
+#elif STM32F401xC
+#include <stm32f4xx_ll_usart.h>
+#else
+#error Module not supported!
+#endif
 
 /************************************
  * MACROS AND DEFINES
