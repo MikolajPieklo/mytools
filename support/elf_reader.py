@@ -242,12 +242,3 @@ class ELFObject:
         ]
 
         return obj
-
-    def to_bin(self, gap_fill=0xff):
-        bin_data = bytearray()
-        for s in self.sections:
-            gap = (s.lma - self.sections[0].lma) - len(bin_data)
-            bin_data += bytes([gap_fill] * gap)
-            bin_data += s.data
-
-        return bin_data
