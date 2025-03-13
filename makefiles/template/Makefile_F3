@@ -21,8 +21,6 @@ DEVICE := STM32F103xB
 SW_FLAG := LORA_E32_RX
 MACH := cortex-m3
 FLOAT_ABI := soft
-MAP  := -Wl,-Map=$(NAME).map  # Create map file
-GC   := -Wl,--gc-sections     # Link for code size
 
 include tools/makefiles/makefile_flags.mk
 
