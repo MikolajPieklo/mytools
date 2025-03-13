@@ -17,6 +17,7 @@ CFLAGS := \
 	-ffunction-sections \
 	-fdata-sections \
 	-fstack-usage \
+	-fno-common \
 	-MMD \
 	-Wfatal-errors \
 	-Werror=implicit \
