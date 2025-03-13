@@ -36,8 +36,10 @@ BraceWrapping: {
     AfterNamespace : 'false'
     AfterStruct : 'true'
     AfterUnion : 'true'
+    AfterExternBlock: 'false'
     BeforeCatch : 'false'
     BeforeElse : 'true'
+    BeforeWhile: 'true'
     IndentBraces : 'false'
     SplitEmptyFunction : 'true'
     SplitEmptyRecord : 'false'
@@ -124,6 +126,14 @@ ReflowComments: true
 InsertBraces: true
 
 AlignConsecutiveMacros : true
+
+IndentExternBlock : Indent
+
+AlignArrayOfStructures: Right
+
+BracedInitializerIndentWidth: 3
+
+PackConstructorInitializers: Never
 
 SortIncludes: true
 IncludeBlocks: Regroup

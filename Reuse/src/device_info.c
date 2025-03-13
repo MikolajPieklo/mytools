@@ -16,6 +16,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include <log.h>
+
 #ifdef STM32F103xB
 #include <stm32f1xx_ll_bus.h>
 #include <stm32f1xx_ll_crc.h>
@@ -38,6 +40,10 @@
 /************************************
  * PRIVATE MACROS AND DEFINES
  ************************************/
+/* Dummy device */
+static const struct device device_dev = {
+    .name = "Device",
+};
 
 /************************************
  * PRIVATE TYPEDEFS
@@ -72,31 +78,31 @@ static void check_restart_issues(void)
 {
    if (true == LL_RCC_IsActiveFlag_HSECSS())
    {
-      printf("Reset cause: HSECSS\r\n");
+      log_info(&device_dev, "Reset cause: HSECSS\r\n");
    }
    if (true == LL_RCC_IsActiveFlag_IWDGRST())
    {
-      printf("Reset cause: IWDGRST\r\n");
+      log_info(&device_dev, "Reset cause: IWDGRST\r\n");
    }
    if (true == LL_RCC_IsActiveFlag_LPWRRST())
    {
-      printf("Reset cause: LPWRRST\r\n");
+      log_info(&device_dev, "Reset cause: LPWRRST\r\n");
    }
    if (true == LL_RCC_IsActiveFlag_PINRST())
    {
-      printf("Reset cause: PINRST\r\n");
+      log_info(&device_dev, "Reset cause: PINRST\r\n");
    }
    if (true == LL_RCC_IsActiveFlag_PORRST())
    {
-      printf("Reset cause: PORRST\r\n");
+      log_info(&device_dev, "Reset cause: PORRST\r\n");
    }
    if (true == LL_RCC_IsActiveFlag_SFTRST())
    {
-      printf("Reset cause: SFTRST\r\n");
+      log_info(&device_dev, "Reset cause: SFTRST\r\n");
    }
    if (true == LL_RCC_IsActiveFlag_WWDGRST())
    {
-      printf("Reset cause: WWDGRST\r\n");
+      log_info(&device_dev, "Reset cause: WWDGRST\r\n");
    }
    LL_RCC_ClearResetFlags();
 }
@@ -116,26 +122,24 @@ void Device_Info(void)
    uint32_t crc_idx = 0;
    uint32_t text_size = (uint32_t) &_etext - (uint32_t) &_stext;
 
-   printf("\x1b[2J\x1b[H");
-   printf("\r\n");
+   log_info(&device_dev, "\x1b[2J\x1b[H");
+   log_info(&device_dev, "\r\n");
 
    for (crc_idx = 0; crc_idx < text_size / 4; crc_idx++)
    {
       LL_CRC_FeedData32(CRC, (uint32_t) * (&_stext + crc_idx));
-      // printf("%lx\r\n", *(&_stext + crc_idx));
    }
 
-
-   printf("#############################\r\n");
-   printf("Device ID: 0x%lx 0x%lx 0x%lx\r\n", LL_GetUID_Word0(), LL_GetUID_Word1(),
-          LL_GetUID_Word2());
+   log_info(&device_dev, "#############################\r\n");
+   log_info(&device_dev, "Device ID: 0x%lx 0x%lx 0x%lx\r\n", LL_GetUID_Word0(), LL_GetUID_Word1(),
+            LL_GetUID_Word2());
    check_restart_issues();
-   printf("Flash size: %ldKB\r\n", LL_GetFlashSize());
-   printf("Program size: 0x%lx\r\n", text_size);
-   printf("Flash usage: \r\n");
-   printf("Flash crc32: 0x%lx\r\n", program_info.text_sec_crc32);
-   printf("Calculated crc32: 0x%lx\r\n", LL_CRC_ReadData32(CRC));
-   printf("Build time: \r\n");
-   printf("commit: \r\n");
-   printf("#############################\r\n");
+   log_info(&device_dev, "Flash size: %ldKB\r\n", LL_GetFlashSize());
+   log_info(&device_dev, "Program size: 0x%lx\r\n", text_size);
+   log_info(&device_dev, "Flash usage: \r\n");
+   log_info(&device_dev, "Flash crc32: 0x%lx\r\n", program_info.text_sec_crc32);
+   log_info(&device_dev, "Calculated crc32: 0x%lx\r\n", LL_CRC_ReadData32(CRC));
+   log_info(&device_dev, "Build time: \r\n");
+   log_info(&device_dev, "commit: \r\n");
+   log_info(&device_dev, "#############################\r\n");
 }
