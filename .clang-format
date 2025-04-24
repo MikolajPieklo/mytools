@@ -127,7 +127,7 @@ InsertBraces: true
 
 AlignConsecutiveMacros : true
 
-IndentExternBlock : Indent
+IndentExternBlock : NoIndent
 
 AlignArrayOfStructures: Right
 
