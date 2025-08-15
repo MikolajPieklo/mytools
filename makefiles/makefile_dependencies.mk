@@ -19,6 +19,10 @@ OBJ_CORE := $(patsubst Core/%.c, $(OBJ_DIR)/%.o, $(SRC_CORE))
 OBJ_DRIVERS := $(SRC_DRIVERS:$(SRC_DRIVERS_DIR)/%.c=$(DRIVER_DIR)/%.o)
 OBJ_REUSE := $(SRC_REUSE:$(SRC_REUSE_DIR)/%.c=$(REUSE_DIR)/%.o)
 
+ifeq ($(USE_SBL), yes)
+
+endif
+
 ifdef USE_FREERTOS
 	ifeq ($(USE_FREERTOS), yes)
 		OBJ_RTOS := $(patsubst tools/FreeRTOS-Kernel/%.c, $(RTOS_DIR)/%.o, $(SRC_RTOS))
