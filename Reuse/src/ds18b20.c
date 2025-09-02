@@ -123,15 +123,6 @@ static int8_t ds18b20_read_memory(int16_t *temperature)
    {
       OneWire_Read(tx, 2U, rx_data, DS18B20_SCRATCHPAD_SIZE);
       crc = wire_crc(rx_data, DS18B20_SCRATCHPAD_SIZE - 1);
-      log_info(&device_dev,
-               "SCRATCHPAD: %02X %02X %02X %02X %02X %02X %02X %02X %02X CRC: %02X\r\n", rx_data[0],
-               rx_data[1], rx_data[2], rx_data[3], rx_data[4], rx_data[5], rx_data[6], rx_data[7],
-               rx_data[8], crc);
-
-      if (NULL != temperature)
-      {
-         *temperature = ((int16_t) (rx_data[1] << 8) | rx_data[0]);
-      }
 
       if (crc == rx_data[DS18B20_SCRATCHPAD_SIZE - 1])
       {
@@ -145,7 +136,18 @@ static int8_t ds18b20_read_memory(int16_t *temperature)
       {
          log_info(&device_dev, "CRC ERROR!\r\n");
          retval = -EBADMSG;
+         break;
       }
+
+      if (NULL != temperature)
+      {
+         *temperature = ((int16_t) (rx_data[1] << 8) | rx_data[0]);
+      }
+
+      log_info(&device_dev,
+         "SCRATCHPAD: %02X %02X %02X %02X %02X %02X %02X %02X %02X CRC: %02X\r\n", rx_data[0],
+         rx_data[1], rx_data[2], rx_data[3], rx_data[4], rx_data[5], rx_data[6], rx_data[7],
+         rx_data[8], crc);
    }
    while (0);
 
@@ -172,7 +174,7 @@ static int8_t ds18b20_get_temperature(void)
 /************************************
  * GLOBAL FUNCTIONS
  ************************************/
-uint8_t DS18B20_Init(void)
+int8_t DS18B20_Init(void)
 {
    do
    {

@@ -34,7 +34,7 @@ extern "C" {
 /************************************
  * GLOBAL FUNCTION PROTOTYPES
  ************************************/
-uint8_t DS18B20_Init(void);
+int8_t DS18B20_Init(void);
 
 #ifdef __cplusplus
 }
