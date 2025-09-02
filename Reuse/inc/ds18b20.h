@@ -1,14 +1,14 @@
 /**
  ********************************************************************************
- * @file    one_wire.h
+ * @file    ds18b20.c
  * @author  Mikolaj Pieklo
- * @date    12.08.2025
+ * @date    22.08.2025
  * @brief
  ********************************************************************************
  */
 
-#ifndef __ONE_WIRE_H__
-#define __ONE_WIRE_H__
+#ifndef __DS18B20_H__
+#define __DS18B20_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,11 +34,7 @@ extern "C" {
 /************************************
  * GLOBAL FUNCTION PROTOTYPES
  ************************************/
-void OneWire_Init(void);
-
-void OneWire_Read(uint8_t *tx, uint8_t tx_size, uint8_t *rx, uint8_t rx_size);
-
-void OneWire_Write(uint8_t *tx, uint8_t tx_size);
+uint8_t DS18B20_Init(void);
 
 #ifdef __cplusplus
 }
