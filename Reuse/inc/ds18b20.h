@@ -35,6 +35,7 @@ extern "C" {
  * GLOBAL FUNCTION PROTOTYPES
  ************************************/
 int8_t DS18B20_Init(void);
+int8_t DS18B20_Get_Temperature(int16_t *temperature);
 
 #ifdef __cplusplus
 }
