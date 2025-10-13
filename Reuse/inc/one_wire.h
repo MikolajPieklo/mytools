@@ -36,9 +36,9 @@ extern "C" {
  ************************************/
 void OneWire_Init(void);
 
-void OneWire_Read(uint8_t *tx, uint8_t tx_size, uint8_t *rx, uint8_t rx_size);
+int8_t OneWire_Read(uint8_t *tx, uint8_t tx_size, uint8_t *rx, uint8_t rx_size);
 
-void OneWire_Write(uint8_t *tx, uint8_t tx_size);
+int8_t OneWire_Write(uint8_t *tx, uint8_t tx_size);
 
 #ifdef __cplusplus
 }

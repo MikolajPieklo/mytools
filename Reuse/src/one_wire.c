@@ -12,6 +12,7 @@
  ************************************/
 #include "one_wire.h"
 
+#include <stddef.h>
 #include <stdint.h>
 
 #include <stm32f1xx_ll_bus.h>
@@ -19,6 +20,7 @@
 #include <stm32f1xx_ll_usart.h>
 
 #include <delay.h>
+#include <errno.h>
 #include <log.h>
 #include <uart.h>
 
@@ -49,11 +51,11 @@ static const struct device device_dev = {
 /************************************
  * STATIC FUNCTION PROTOTYPES
  ************************************/
-static void    onewire_reset(void);
-static void    onewire_write(uint8_t byte);
-static uint8_t onewire_read(void);
-static void    write_bit(uint8_t value);
-static uint8_t read_bit(void);
+static void   onewire_reset(void);
+static void   onewire_write(uint8_t byte);
+static int8_t onewire_read(uint8_t *byte);
+static void   write_bit(uint8_t value);
+static int8_t read_bit(uint8_t *value);
 
 /************************************
  * STATIC FUNCTIONS
@@ -79,22 +81,33 @@ static void onewire_write(uint8_t byte)
    }
 }
 
-static uint8_t onewire_read(void)
+static int8_t onewire_read(uint8_t *byte)
 {
    uint8_t value = 0U;
    uint8_t i = 0U;
+   uint8_t rx = 0U;
+   int8_t  status = 0;
 
    USARTx_Set_BaudRate(USART2, 115200U);
 
    for (i = 0U; i < 8U; i++)
    {
       value >>= 1U;
-      if (read_bit())
+      status = read_bit(&rx);
+      if (status != 0)
+      {
+         break;
+      }
+      if (rx)
       {
          value |= 0x80U;
       }
    }
-   return value;
+   if (NULL != byte)
+   {
+      *byte = value;
+   }
+   return status;
 }
 
 static void write_bit(uint8_t value)
@@ -111,13 +124,18 @@ static void write_bit(uint8_t value)
    USARTx_Tx(USART2, &tx, 1U);
 }
 
-static uint8_t read_bit(void)
+static int8_t read_bit(uint8_t *value)
 {
+   int8_t  status = 0;
    uint8_t tx = 0xFFU;
    uint8_t rx = 0U;
    USARTx_Tx(USART2, &tx, 1U);
-   USARTx_Rx(USART2, &rx, 1U);
-   return rx & 0x01U;
+   status = USARTx_Rx(USART2, &rx, 1U);
+   if (NULL != value)
+   {
+      *value = rx & 0x01U;
+   }
+   return status;
 }
 
 /************************************
@@ -128,9 +146,16 @@ void OneWire_Init(void)
    USART2_Init();
 }
 
-void OneWire_Read(uint8_t *tx, uint8_t tx_size, uint8_t *rx, uint8_t rx_size)
+int8_t OneWire_Read(uint8_t *tx, uint8_t tx_size, uint8_t *rx, uint8_t rx_size)
 {
    uint8_t i;
+   int8_t  status = 0;
+
+   if (NULL == tx || tx_size == 0U || NULL == rx || rx_size == 0U)
+   {
+      log_err(&device_dev, "OneWire_Read() - Invalid parameters\r\n");
+      return -EINVAL;
+   }
 
    onewire_reset();
 
@@ -141,20 +166,33 @@ void OneWire_Read(uint8_t *tx, uint8_t tx_size, uint8_t *rx, uint8_t rx_size)
 
    for (i = 0U; i < rx_size; i++)
    {
-      rx[i] = onewire_read();
+      uint8_t tmp_rx = 0U;
+      status = onewire_read(&tmp_rx);
+      if (status != 0)
+      {
+         break;
+      }
+      rx[i] = tmp_rx;
    }
 
-   return;
+   return status;
 }
 
-void OneWire_Write(uint8_t *tx, uint8_t tx_size)
+int8_t OneWire_Write(uint8_t *tx, uint8_t tx_size)
 {
    uint8_t i;
 
+   if (NULL == tx || tx_size == 0U)
+   {
+      log_err(&device_dev, "OneWire_Write() - Invalid parameters\r\n");
+      return -EINVAL;
+   }
    onewire_reset();
 
    for (i = 0U; i < tx_size; i++)
    {
       onewire_write(tx[i]);
    }
+
+   return 0;
 }
