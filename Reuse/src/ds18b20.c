@@ -97,7 +97,12 @@ static int8_t ds18b20_read_address(void)
    uint8_t crc = 0U;
    uint8_t rx_data[8] = {0};
 
-   OneWire_Read(&tx, 1U, rx_data, DS18B20_ROM_CODE_SIZE);
+   retval = OneWire_Read(&tx, 1U, rx_data, DS18B20_ROM_CODE_SIZE);
+   if (retval != 0)
+   {
+      log_err(&device_dev, "Error during read address!\r\n");
+      return retval;
+   }
    crc = wire_crc(rx_data, DS18B20_ROM_CODE_SIZE - 1);
    log_info(&device_dev, "ROM: %02X %02X %02X %02X %02X %02X %02X %02X CRC: %02X\r\n", rx_data[0],
             rx_data[1], rx_data[2], rx_data[3], rx_data[4], rx_data[5], rx_data[6], rx_data[7],
@@ -121,7 +126,12 @@ static int8_t ds18b20_read_memory(uint16_t *data)
 
    do
    {
-      OneWire_Read(tx, 2U, rx_data, DS18B20_SCRATCHPAD_SIZE);
+      retval = OneWire_Read(tx, 2U, rx_data, DS18B20_SCRATCHPAD_SIZE);
+      if (retval != 0)
+      {
+         log_err(&device_dev, "Error during read memory\r\n");
+         return retval;
+      }
       crc = wire_crc(rx_data, DS18B20_SCRATCHPAD_SIZE - 1);
 
       if (crc == rx_data[DS18B20_SCRATCHPAD_SIZE - 1])
@@ -145,13 +155,12 @@ static int8_t ds18b20_read_memory(uint16_t *data)
       {
          *data = ((int16_t) (rx_data[1] << 8) | rx_data[0]);
       }
-
-      log_info(&device_dev,
-               "SCRATCHPAD: %02X %02X %02X %02X %02X %02X %02X %02X %02X CRC: %02X\r\n", rx_data[0],
-               rx_data[1], rx_data[2], rx_data[3], rx_data[4], rx_data[5], rx_data[6], rx_data[7],
-               rx_data[8], crc);
    }
    while (0);
+
+   log_info(&device_dev, "SCRATCHPAD: %02X %02X %02X %02X %02X %02X %02X %02X %02X CRC: %02X\r\n",
+            rx_data[0], rx_data[1], rx_data[2], rx_data[3], rx_data[4], rx_data[5], rx_data[6],
+            rx_data[7], rx_data[8], crc);
 
    return retval;
 }
@@ -160,13 +169,18 @@ static int8_t ds18b20_get_temperature(int16_t *temperature)
 {
    int8_t  status = 0;
    uint8_t tx[2] = {DS18B20_SKIP_ROM, DS18B20_CONVERT_T};
-   OneWire_Write(tx, 2U);
+   status = OneWire_Write(tx, 2U);
+   if (0 != status)
+   {
+      log_err(&device_dev, "Error during convert T\r\n");
+      return status;
+   }
 
    TS_Delay_ms(750);
    status = ds18b20_read_memory((uint16_t *) temperature);
    if (0 == status)
    {
-      *temperature *= 6.25f;
+      *temperature *= 0.0625f;
       log_info(&device_dev, "TEMP: %d\r\n", *temperature);
    }
 
