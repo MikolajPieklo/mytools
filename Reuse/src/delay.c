@@ -39,8 +39,8 @@
 /************************************
  * STATIC VARIABLES
  ************************************/
-static bool     timer_us_is_initialized = false;
-static uint32_t timer_us_counter = 0;
+static bool   timer_us_is_initialized = false;
+volatile bool is_tim_overload = 0;
 /************************************
  * GLOBAL VARIABLES
  ************************************/
@@ -65,7 +65,8 @@ void TIM4_IRQHandler(void)
    {
       /* Clear the update interrupt flag*/
       LL_TIM_ClearFlag_UPDATE(TIM4);
-      timer_us_counter++;
+      is_tim_overload = true;
+      LL_TIM_DisableCounter(TIM4);
    }
 }
 
@@ -77,6 +78,7 @@ void TS_Delay_ms(uint32_t delay_ms)
    uint32_t tickstart = SysTickValue;
    while ((SysTickValue - tickstart) < delay_ms)
    {
+      __NOP();
    }
 }
 
@@ -89,11 +91,14 @@ void TS_Delay_us_Init(void)
    LL_TIM_SetCounterMode(TIM4, LL_TIM_COUNTERMODE_UP);
 
    /*
-     Prescaler = (TIM2CLK / TIM2 counter clock) - 1
+     Prescaler = (TIM4CLK / TIM4 counter clock) - 1
      Prescaler = (36MHz / 1 MHz) - 1
    */
    LL_TIM_SetPrescaler(TIM4, 35);
-   LL_TIM_SetAutoReload(TIM4, 1);
+   LL_TIM_SetAutoReload(TIM4, 0);
+
+   /* Clear pending flags */
+   is_tim_overload = false;
 
    /* Enable the update interrupt */
    LL_TIM_EnableIT_UPDATE(TIM4);
@@ -104,6 +109,7 @@ void TS_Delay_us_Init(void)
 
    /* Force update generation */
    LL_TIM_GenerateEvent_UPDATE(TIM4);
+   LL_TIM_ClearFlag_UPDATE(TIM4);
 
    timer_us_is_initialized = true;
 }
@@ -117,16 +123,26 @@ void TS_Delay_us(uint32_t delay_us)
          break;
       }
 
+      if (1 == delay_us)
+      {
+         delay_us = 2;
+      }
+
+      LL_TIM_SetAutoReload(TIM4, delay_us - 1);
+      LL_TIM_SetCounter(TIM4, 0);
+      is_tim_overload = false;
+      LL_TIM_ClearFlag_UPDATE(TIM4);
       /* Enable counter */
       LL_TIM_EnableCounter(TIM4);
 
-      while (timer_us_counter < delay_us)
+      while (!is_tim_overload)
       {
+         __NOP();
       }
-
-      LL_TIM_DisableCounter(TIM4);
-      timer_us_counter = 0;
-   } while (0);
+      is_tim_overload = false;
+      LL_TIM_ClearFlag_UPDATE(TIM4);
+   }
+   while (0);
 }
 
 uint32_t TS_Get_ms(void)

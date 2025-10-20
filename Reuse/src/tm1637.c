@@ -47,20 +47,20 @@ const char segmentMap[] = {0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, // 0-
 /************************************
  * STATIC FUNCTION PROTOTYPES
  ************************************/
-void _tm1637Start(void);
-void _tm1637Stop(void);
-void _tm1637ReadResult(void);
-void _tm1637WriteByte(unsigned char b);
-void _tm1637DelayUsec(unsigned int i);
-void _tm1637ClkHigh(void);
-void _tm1637ClkLow(void);
-void _tm1637DioHigh(void);
-void _tm1637DioLow(void);
+static void        _tm1637Start(void);
+static void        _tm1637Stop(void);
+static void        _tm1637ReadResult(void);
+static void        _tm1637WriteByte(uint8_t b);
+static inline void _tm1637DelayUsec(uint32_t i);
+static inline void _tm1637ClkHigh(void);
+static inline void _tm1637ClkLow(void);
+static inline void _tm1637DioHigh(void);
+static inline void _tm1637DioLow(void);
 
 /************************************
  * STATIC FUNCTIONS
  ************************************/
-void _tm1637Start(void)
+static void _tm1637Start(void)
 {
    _tm1637ClkHigh();
    _tm1637DioHigh();
@@ -68,7 +68,7 @@ void _tm1637Start(void)
    _tm1637DioLow();
 }
 
-void _tm1637Stop(void)
+static void _tm1637Stop(void)
 {
    _tm1637ClkLow();
    _tm1637DelayUsec(2);
@@ -79,7 +79,7 @@ void _tm1637Stop(void)
    _tm1637DioHigh();
 }
 
-void _tm1637ReadResult(void)
+static void _tm1637ReadResult(void)
 {
    _tm1637ClkLow();
    _tm1637DelayUsec(5);
@@ -89,7 +89,7 @@ void _tm1637ReadResult(void)
    _tm1637ClkLow();
 }
 
-void _tm1637WriteByte(unsigned char b)
+static void _tm1637WriteByte(uint8_t b)
 {
    for (int i = 0; i < 8; ++i)
    {
@@ -109,27 +109,27 @@ void _tm1637WriteByte(unsigned char b)
    }
 }
 
-void _tm1637DelayUsec(unsigned int i)
+static inline void _tm1637DelayUsec(uint32_t i)
 {
    TS_Delay_us(i);
 }
 
-void _tm1637ClkHigh(void)
+static inline void _tm1637ClkHigh(void)
 {
    LL_GPIO_SetOutputPin(CLK_PORT, CLK_PIN);
 }
 
-void _tm1637ClkLow(void)
+static inline void _tm1637ClkLow(void)
 {
    LL_GPIO_ResetOutputPin(CLK_PORT, CLK_PIN);
 }
 
-void _tm1637DioHigh(void)
+static inline void _tm1637DioHigh(void)
 {
    LL_GPIO_SetOutputPin(DIO_PORT, DIO_PIN);
 }
 
-void _tm1637DioLow(void)
+static inline void _tm1637DioLow(void)
 {
    LL_GPIO_ResetOutputPin(DIO_PORT, DIO_PIN);
 }
