@@ -16,6 +16,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "tm1637.h"
 #include <log.h>
 
 #ifdef STM32F103xB
@@ -42,7 +43,7 @@
  ************************************/
 /* Dummy device */
 static const struct device device_dev = {
-    .name = "Device",
+   .name = "Device",
 };
 
 /************************************
@@ -61,7 +62,7 @@ __attribute__((section(".program_info_section"))) volatile const program_info_t 
 /************************************
  * STATIC VARIABLES
  ************************************/
-
+static Device_Restart_Issue_T restart_issue = DEVICE_RESTART_ISSUE_NONE;
 /************************************
  * GLOBAL VARIABLES
  ************************************/
@@ -79,30 +80,37 @@ static void check_restart_issues(void)
    if (true == LL_RCC_IsActiveFlag_HSECSS())
    {
       log_info(&device_dev, "Reset cause: HSECSS\r\n");
+      restart_issue = DEVICE_RESTART_ISSUE_HSECSS;
    }
    if (true == LL_RCC_IsActiveFlag_IWDGRST())
    {
       log_info(&device_dev, "Reset cause: IWDGRST\r\n");
+      restart_issue = DEVICE_RESTART_ISSUE_IWDG;
    }
    if (true == LL_RCC_IsActiveFlag_LPWRRST())
    {
       log_info(&device_dev, "Reset cause: LPWRRST\r\n");
+      restart_issue = DEVICE_RESTART_ISSUE_LPWR;
    }
    if (true == LL_RCC_IsActiveFlag_PINRST())
    {
       log_info(&device_dev, "Reset cause: PINRST\r\n");
+      restart_issue = DEVICE_RESTART_ISSUE_PIN;
    }
    if (true == LL_RCC_IsActiveFlag_PORRST())
    {
       log_info(&device_dev, "Reset cause: PORRST\r\n");
+      restart_issue = DEVICE_RESTART_ISSUE_POR;
    }
    if (true == LL_RCC_IsActiveFlag_SFTRST())
    {
       log_info(&device_dev, "Reset cause: SFTRST\r\n");
+      restart_issue = DEVICE_RESTART_ISSUE_SFT;
    }
    if (true == LL_RCC_IsActiveFlag_WWDGRST())
    {
       log_info(&device_dev, "Reset cause: WWDGRST\r\n");
+      restart_issue = DEVICE_RESTART_ISSUE_WWDG;
    }
    LL_RCC_ClearResetFlags();
 }
@@ -127,7 +135,7 @@ void Device_Info(void)
 
    for (crc_idx = 0; crc_idx < text_size / 4; crc_idx++)
    {
-      LL_CRC_FeedData32(CRC, (uint32_t) * (&_stext + crc_idx));
+      LL_CRC_FeedData32(CRC, (uint32_t) *(&_stext + crc_idx));
    }
 
    log_info(&device_dev, "#############################\r\n");
@@ -142,4 +150,9 @@ void Device_Info(void)
    log_info(&device_dev, "Build time: \r\n");
    log_info(&device_dev, "commit: \r\n");
    log_info(&device_dev, "#############################\r\n");
+}
+
+Device_Restart_Issue_T Device_Info_Get_Restart_Issue(void)
+{
+   return restart_issue;
 }

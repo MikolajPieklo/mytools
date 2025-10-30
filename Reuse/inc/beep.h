@@ -1,14 +1,14 @@
 /**
  ********************************************************************************
- * @file    device_info.h
+ * @file    beep.h
  * @author  Mikolaj Pieklo
- * @date    10.11.2023
+ * @date    26.10.2025
  * @brief
  ********************************************************************************
  */
 
-#ifndef __DEVICE_INFO_H__
-#define __DEVICE_INFO_H__
+#ifndef __NAME_H__
+#define __NAME_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,7 +17,7 @@ extern "C" {
 /************************************
  * INCLUDES
  ************************************/
-
+#include <stdint.h>
 /************************************
  * MACROS AND DEFINES
  ************************************/
@@ -25,17 +25,6 @@ extern "C" {
 /************************************
  * TYPEDEFS
  ************************************/
-typedef enum Device_Restart_Issue_Tag
-{
-   DEVICE_RESTART_ISSUE_NONE = 0,
-   DEVICE_RESTART_ISSUE_HSECSS,
-   DEVICE_RESTART_ISSUE_IWDG,
-   DEVICE_RESTART_ISSUE_LPWR,
-   DEVICE_RESTART_ISSUE_PIN,
-   DEVICE_RESTART_ISSUE_POR,
-   DEVICE_RESTART_ISSUE_SFT,
-   DEVICE_RESTART_ISSUE_WWDG,
-} Device_Restart_Issue_T;
 
 /************************************
  * EXPORTED VARIABLES
@@ -44,9 +33,13 @@ typedef enum Device_Restart_Issue_Tag
 /************************************
  * GLOBAL FUNCTION PROTOTYPES
  ************************************/
-void Device_Info(void);
+void     Beep_Init(void);
+void     Beep_Pulse(uint8_t ms);
+void     Beep_Set_Warning(void);
+void     Beep_Clear_Warning(void);
+uint16_t Beep_Get_Warning_Status(void);
+void     Beep_Task(void);
 
-Device_Restart_Issue_T Device_Info_Get_Restart_Issue(void);
 
 #ifdef __cplusplus
 }

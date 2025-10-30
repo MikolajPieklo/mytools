@@ -16,6 +16,7 @@
 #include <stm32f1xx_ll_gpio.h>
 
 #include "delay.h"
+#include "device_info.h"
 /************************************
  * EXTERN VARIABLES
  ************************************/
@@ -223,6 +224,7 @@ void TM1637ShowError(void)
 
 void TM1637ShowStartMessage(void)
 {
+   Device_Restart_Issue_T restart = Device_Info_Get_Restart_Issue();
    _tm1637Start();
    _tm1637WriteByte(0x40);
    _tm1637ReadResult();
@@ -232,6 +234,9 @@ void TM1637ShowStartMessage(void)
    _tm1637WriteByte(0xc0);
    _tm1637ReadResult();
 
+   // Error issue code
+   _tm1637WriteByte(segmentMap[restart]);
+   _tm1637ReadResult();
    // H
    _tm1637WriteByte(0x76);
    _tm1637ReadResult();
@@ -241,9 +246,7 @@ void TM1637ShowStartMessage(void)
    // L
    _tm1637WriteByte(0x38);
    _tm1637ReadResult();
-   // L
-   _tm1637WriteByte(0x38);
-   _tm1637ReadResult();
+
    _tm1637Stop();
 }
 
