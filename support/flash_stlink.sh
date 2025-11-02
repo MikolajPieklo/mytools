@@ -28,7 +28,7 @@ fi
 openocd -f /usr/share/openocd/scripts/interface/stlink.cfg \
         -c "hla_serial $serial" \
         -f /usr/share/openocd/scripts/target/$1.cfg \
-        -c "program out/target.elf verify reset exit"
+        -c "program out/app.elf verify reset exit"
 
 
 # openocd -f interface.cfg -f target.cfg -c "program firmware.bin 0x08004000 verify reset exit"
