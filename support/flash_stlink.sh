@@ -1,5 +1,8 @@
 #!/bin/bash
 
+TARGET_CFG=$1
+ELF_FILE=$2
+
 serials=$(st-info --serial)
 
 if [[ -z "$serials" ]]; then
@@ -27,8 +30,8 @@ fi
 
 openocd -f /usr/share/openocd/scripts/interface/stlink.cfg \
         -c "hla_serial $serial" \
-        -f /usr/share/openocd/scripts/target/$1.cfg \
-        -c "program out/app.elf verify reset exit"
+        -f /usr/share/openocd/scripts/target/$TARGET_CFG.cfg \
+        -c "program $ELF_FILE verify reset exit"
 
 
 # openocd -f interface.cfg -f target.cfg -c "program firmware.bin 0x08004000 verify reset exit"

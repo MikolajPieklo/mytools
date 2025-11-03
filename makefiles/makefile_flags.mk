@@ -33,7 +33,6 @@ LDFLAGS := \
 	-mcpu=$(MACH) \
 	-mthumb \
 	-mfloat-abi=$(FLOAT_ABI) \
-	-T"tools/$(NAME_LINKER_SCRIPT).ld" \
 	$(MAP) \
 	$(GC) \
 	-static \

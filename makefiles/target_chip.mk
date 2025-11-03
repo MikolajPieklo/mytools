@@ -1,8 +1,14 @@
 
-.PHONY: load restart reset
+.PHONY: load load_app load_sbl restart reset
 
 load:
-	./tools/support/flash_stlink.sh "$(NAME_OPENOCD_CFG)"
+	./tools/support/flash_stlink.sh "$(NAME_OPENOCD_CFG)" "out/combined.hex"
+
+load_app:
+	./tools/support/flash_stlink.sh "$(NAME_OPENOCD_CFG)" "out/app.hex"
+
+load_sbl:
+	./tools/support/flash_stlink.sh "$(NAME_OPENOCD_CFG)" "out/SBL/sbl.hex"
 
 restart:
 	openocd -f /usr/share/openocd/scripts/interface/stlink.cfg \

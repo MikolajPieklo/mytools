@@ -33,7 +33,7 @@
 */
 
 /* Entry Point */
-ENTRY(Reset_Handler)
+ENTRY(Boot_Reset_Handler)
 
 /* Highest address of the user mode stack */
 _estack = ORIGIN(RAM) + LENGTH(RAM); /* end of "RAM" Ram type memory */
@@ -45,40 +45,12 @@ _Min_Stack_Size = 0x400 ; /* required amount of stack */
 MEMORY
 {
   RAM    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 20K
-  FLASH    (rx)    : ORIGIN = 0x8000000,   LENGTH = 64K
+  FLASH   (rx)    : ORIGIN = 0x08000000,   LENGTH = 6K
 }
-
-/* Rozmiar SBL – dowolny, np. 32 KB */
-BOOT_SIZE    = 32K;
-BOOT_ORIGIN  = ORIGIN(FLASH);
-BOOT_END     = BOOT_ORIGIN + BOOT_SIZE;
-
-/* Aplikacja zaczyna się za SBL-em */
-APP_ORIGIN   = BOOT_END;
-APP_SIZE     = LENGTH(FLASH) - BOOT_SIZE;   /* reszta flasha */
 
 /* Sections */
 SECTIONS
 {
-  /* ------------------- BOOTLOADER ------------------- */
-  .isr_vector_boot (NOLOAD) :
-  {
-    KEEP(*(.isr_vector_boot))          /* wektor SBL */
-  } > FLASH =0xFF
-
-  .text_boot :
-  {
-    *(.text_boot*)                     /* kod SBL */
-    *(.rodata_boot*)
-    . = ALIGN(4);
-  } > FLASH AT> FLASH
-
-  .data_boot :
-  {
-    *(.data_boot*)
-    . = ALIGN(4);
-  } > RAM AT> FLASH
-
   /* The startup code into "FLASH" Rom type memory */
   .isr_vector :
   {
@@ -103,16 +75,6 @@ SECTIONS
 
     . = ALIGN(4);
     _etext = .;        /* define a global symbols at end of code */
-  } >FLASH
-
-  .program_info_section :
-  {
-    . = ALIGN(4);
-    _sprogram_info_section = .;
-    *(.info_section)
-    *(.info_section*)
-    . = ALIGN(4);
-    _eprogram_info_section = .;
   } >FLASH
 
   /* Constant data into "FLASH" Rom type memory */
