@@ -1,3 +1,7 @@
+[submodule "freertos"]
+	path = freertos
+	url = https://github.com/FreeRTOS/FreeRTOS-Kernel.git
+
 [submodule "tinyusb"]
 	path = tinyusb
 	url = https://github.com/hathach/tinyusb.git
