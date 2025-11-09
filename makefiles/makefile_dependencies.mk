@@ -3,8 +3,8 @@ SRC_CORE_DIR_WITHOUT_PREFIX := $(foreach dir, $(SRC_CORE_DIRS), $(patsubst Core/
 SRC_CORE := $(foreach dir, $(SRC_CORE_DIRS), $(wildcard $(dir)/*.c))
 SRC_DRIVERS := $(wildcard $(SRC_DRIVERS_DIR)/*.c)
 
-PATH_REUSE_DIR := tools/Reuse/src
-SRC_REUSE := $(foreach dir, $(PATH_REUSE_DIR), $(wildcard $(dir)/*.c))
+PATH_REUSE_DIR := tools/Reuse
+SRC_REUSE := $(shell find $(PATH_REUSE_DIR) -type f -name "*.c")
 
 PATH_SBL_DIR := tools/bootloader/src
 SRC_SBL := $(foreach dir, $(PATH_SBL_DIR), $(wildcard $(dir)/*.c))
@@ -20,7 +20,7 @@ endif
 
 OBJ_CORE := $(patsubst Core/%.c, $(OBJ_DIR)/%.o, $(SRC_CORE))
 OBJ_DRIVERS := $(SRC_DRIVERS:$(SRC_DRIVERS_DIR)/%.c=$(DRIVER_DIR)/%.o)
-OBJ_REUSE := $(SRC_REUSE:$(PATH_REUSE_DIR)/%.c=$(REUSE_DIR)/%.o)
+OBJ_REUSE := $(patsubst $(PATH_REUSE_DIR)/%.c,$(REUSE_DIR)/%.o,$(SRC_REUSE))
 OBJ_SBL := $(SRC_SBL:$(PATH_SBL_DIR)/%.c=$(SBL_DIR)/%.o)
 
 ifdef USE_FREERTOS
@@ -44,44 +44,46 @@ ifdef USE_FREERTOS
 endif
 
 $(OBJ_DIR)/%.o: Core/%.c
-	@echo "Compiling $<..."
+	@echo "Compiling $< -> $@"
+	@mkdir -p $(dir $@)
 	$(SILENTMODE_FLAG) $(CC) $(CFLAGS) $(CONST) $(DEBUGINFO) $(INC) $< -o $@
 
 $(DRIVER_DIR)/%.o: $(SRC_DRIVERS_DIR)/%.c
-	@echo "Compiling $<..."
+	@echo "Compiling $< -> $@"
 	$(SILENTMODE_FLAG) $(CC) $(CFLAGS) $(CONST) $(DEBUGINFO) $(INC) $< -o $@
 
 $(REUSE_DIR)/%.o: $(PATH_REUSE_DIR)/%.c
-	@echo "Compiling $<..."
+	@echo "Compiling $< -> $@"
+	@mkdir -p $(dir $@)
 	$(SILENTMODE_FLAG) $(CC) $(CFLAGS) $(CONST) $(DEBUGINFO) $(INC) $< -o $@
 
 $(SBL_DIR)/%.o: $(PATH_SBL_DIR)/%.c
-	@echo "Compiling $<..."
+	@echo "Compiling $< -> $@"
 	$(SILENTMODE_FLAG) $(CC) $(CFLAGS) $(CONST) $(DEBUGINFO) $(INC) $< -o $@
 
 ifdef USE_FREERTOS
 ifeq ($(USE_FREERTOS), yes)
 $(RTOS_DIR)/%.o: $(PATH_RTOS_DIR)/%.c
-	@echo "Compiling $<..."
+	@echo "Compiling $< -> $@"
 	$(SILENTMODE_FLAG) $(CC) $(CFLAGS) $(CONST) $(DEBUGINFO) $(INC) $< -o $@
 
 $(RTOS_DIR)/%.o: $(SRC_RTOS_DIR_PORT)/%.c
-	@echo "Compiling $<..."
+	@echo "Compiling $< -> $@"
 	$(SILENTMODE_FLAG) $(CC) $(CFLAGS) $(CONST) $(DEBUGINFO) $(INC) $< -o $@
 
 $(RTOS_DIR)/%.o: $(SRC_RTOS_DIR_HEAP)/%.c
-	@echo "Compiling $<..."
+	@echo "Compiling $< -> $@"
 	$(SILENTMODE_FLAG) $(CC) $(CFLAGS) $(CONST) $(DEBUGINFO) $(INC) $< -o $@
 endif
 endif
 
 # $^ dependency $@ target
 $(OBJ_DIR)/$(NAME_STARTUP_FILE).o: Core/Startup/$(NAME_STARTUP_FILE).s
-	@echo "Compiling $<..."
+	@echo "Compiling $< -> $@"
 	$(SILENTMODE_FLAG) $(CC) $(CFLAGS) $(CONST) $(DEBUGINFO) $< -o $@
 
 $(SBL_DIR)/sbl_startup_stm32f103c8tx.o: $(PATH_SBL_DIR)/sbl_startup_stm32f103c8tx.s
-	@echo "Compiling $<..."
+	@echo "Compiling $< -> $@"
 	$(SILENTMODE_FLAG) $(CC) $(CFLAGS) $(CONST) $(DEBUGINFO) $< -o $@
 
 -include $(OBJ_CORE:.o=.d)
