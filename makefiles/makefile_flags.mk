@@ -11,6 +11,7 @@ CFLAGS := \
 	-O$(OPTIMIZATION) \
 	-D$(DEVICE) \
 	-D$(SW_FLAG) \
+	-DSBL_SIZE_KB=$(SBL_SIZE_KB) \
 	$(USE_NANO) \
 	-Wall \
 	-Wextra \
@@ -42,9 +43,14 @@ LDFLAGS := \
 	-Wl,--print-memory-usage \
 	-Wl,--cref
 
+ifeq ($(USE_SBL), no)
+	SBL_SIZE_KB := 0
+endif
+	LDFLAGS += -Wl,-defsym,SBL_SIZE_KB=$(SBL_SIZE_KB)
+
 ifeq ($(MACH), cortex-m4)
 	CFLAGS += -mfpu=fpv4-sp-d16
-	LD += -mfpu=fpv4-sp-d16
+	LDFLAGS += -mfpu=fpv4-sp-d16
 
 	CONST := -DUSE_FULL_LL_DRIVER -DHSE_VALUE=25000000 -DHSE_STARTUP_TIMEOUT=100 -DLSE_STARTUP_TIMEOUT=5000 \
 		-DLSE_VALUE=32768 -DHSI_VALUE=16000000 -DLSI_VALUE=32000 -DVDD_VALUE=3300 -DUSE_FULL_ASSERT=1U -DPREFETCH_ENABLE=1 \

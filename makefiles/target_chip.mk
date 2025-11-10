@@ -1,8 +1,13 @@
 
 .PHONY: load load_app load_sbl restart reset
 
+ifeq ($(USE_SBL), yes)
 load:
 	./tools/support/flash_stlink.sh "$(NAME_OPENOCD_CFG)" "out/combined.hex"
+else
+load:
+	./tools/support/flash_stlink.sh "$(NAME_OPENOCD_CFG)" "out/app.hex"
+endif
 
 load_app:
 	./tools/support/flash_stlink.sh "$(NAME_OPENOCD_CFG)" "out/app.hex"

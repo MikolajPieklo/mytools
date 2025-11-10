@@ -5,8 +5,12 @@ HEX_APP:
 	python tools/support/elf_update.py "out/app.elf"
 	$(call generate_files_auto,out/app.elf)
 
+ifeq ($(USE_SBL), yes)
 HEX_SBL:
 	$(call generate_files_auto,out/SBL/sbl.elf)
+else
+HEX_SBL:
+endif
 
 ifeq ($(USE_SBL),yes)
 HEX_COMBINED:
@@ -20,7 +24,6 @@ HEX_COMBINED:
 	fi
 else
 HEX_COMBINED:
-		$(MAKE) HEX_APP
 endif
 
 define generate_files_auto

@@ -2,7 +2,7 @@
 # Date: 09.11.2025
 # Project: STM32F103C8T6_HELLO_WORLD.
 # License: Opensource
-# Version: 1.0.0
+# Version: 1.0.1
 
 include tools/makefiles/makefile_colors.mk
 include tools/makefiles/makefile_info.mk
@@ -19,6 +19,7 @@ NAME := $(OUT_DIR)/APP
 NAME_STARTUP_FILE := startup_stm32f103c8tx
 NAME_APP_LINKER_SCRIPT := STM32F103C8TX_FLASH_APP
 NAME_SBL_LINKER_SCRIPT := STM32F103C8TX_FLASH_SBL
+SBL_SIZE_KB := 8
 NAME_OPENOCD_CFG := stm32f1x
 DEVICE := STM32F103xB
 SW_FLAG := LORA_E32_RX
@@ -29,7 +30,6 @@ include tools/makefiles/makefile_flags.mk
 
 INC := \
 	-ICore/MAIN/inc/ \
-	-ICore/CC1101/inc \
 	-Itools/Reuse/inc \
 	-IDrivers/STM32F1xx_HAL_Driver/inc/ \
 	-IDrivers/CMSIS/Device/ST/STM32F1xx/Include/ \

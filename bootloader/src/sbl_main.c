@@ -20,7 +20,7 @@
 /************************************
  * PRIVATE MACROS AND DEFINES
  ************************************/
-#define APP_ADDRESS 0x08001800UL
+#define APP_ADDRESS (0x08000000UL + (SBL_SIZE_KB * 1024U))
 
 /************************************
  * PRIVATE TYPEDEFS

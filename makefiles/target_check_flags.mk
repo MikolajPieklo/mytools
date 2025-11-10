@@ -3,6 +3,13 @@
 
 check_flags:
 
+	@if [ -n "$(USE_SBL)" ]; then \
+		echo "USE_SBL is defined: $(USE_SBL)"; \
+	else \
+		echo "USE_SBL is not defined"; \
+		USE_SBL ?= no; \
+	fi
+
 	@if [ -n "$(USE_FREERTOS)" ]; then \
 		echo "USE_FREERTOS is defined: $(USE_FREERTOS)"; \
 	else \
