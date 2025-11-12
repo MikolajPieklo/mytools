@@ -8,9 +8,17 @@
 
 #include "nrf.h"
 
+#ifdef STM32F103xB
 #include <stm32f1xx_ll_bus.h>
 #include <stm32f1xx_ll_gpio.h>
 #include <stm32f1xx_ll_spi.h>
+#elif STM32F401xC
+#include <stm32f4xx_ll_bus.h>
+#include <stm32f4xx_ll_gpio.h>
+#include <stm32f4xx_ll_spi.h>
+#else
+#error Module not supported!
+#endif
 
 #include <delay.h>
 #include <spi.h>
@@ -275,7 +283,11 @@ void NRF24_RxMode(uint8_t *address, uint8_t channel)
 
 void nRF24_Init(void)
 {
+#ifdef STM32F103xB
    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_GPIOB);
+#elif STM32F401xC
+   LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOB);
+#endif
 
    LL_GPIO_SetPinMode(GPIOB, NRF_CE_Pin, LL_GPIO_MODE_OUTPUT);
    LL_GPIO_SetPinSpeed(GPIOB, NRF_CE_Pin, LL_GPIO_SPEED_FREQ_HIGH);

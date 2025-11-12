@@ -12,10 +12,19 @@
  ************************************/
 #include "lora_e32.h"
 
+#ifdef STM32F103xB
 #include <stm32f1xx_ll_bus.h>
 #include <stm32f1xx_ll_exti.h>
 #include <stm32f1xx_ll_gpio.h>
 #include <stm32f1xx_ll_usart.h>
+#elif STM32F401xC
+#include <stm32f4xx_ll_bus.h>
+#include <stm32f4xx_ll_exti.h>
+#include <stm32f4xx_ll_gpio.h>
+#include <stm32f4xx_ll_usart.h>
+#else
+#error Module not supported!
+#endif
 
 #include <circual_buffer.h>
 #include <crc16.h>

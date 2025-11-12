@@ -1,8 +1,8 @@
 /**
  ********************************************************************************
- * @file    sbl_main.c
+ * @file    uart.c
  * @author  Mikolaj Pieklo
- * @date    12.08.2025
+ * @date    12.11.2025
  * @brief
  ********************************************************************************
  */
@@ -10,15 +10,7 @@
 /************************************
  * INCLUDES
  ************************************/
-#include <stdint.h>
-
-#ifdef STM32F103xB
-#include "stm32f1xx.h"
-#elif STM32F401xC
-#include "stm32f4xx.h"
-#else
-#error Module not supported!
-#endif
+#include "uart.h"
 
 /************************************
  * EXTERN VARIABLES
@@ -27,12 +19,10 @@
 /************************************
  * PRIVATE MACROS AND DEFINES
  ************************************/
-#define APP_ADDRESS (0x08000000UL + (SBL_SIZE_KB * 1024U))
 
 /************************************
  * PRIVATE TYPEDEFS
  ************************************/
-typedef void (*pFunction)(void);
 
 /************************************
  * STATIC VARIABLES
@@ -53,27 +43,22 @@ typedef void (*pFunction)(void);
 /************************************
  * GLOBAL FUNCTIONS
  ************************************/
-void boot_main(void)
+int8_t USARTx_Set_BaudRate(USART_TypeDef *USARTx, uint32_t baudRate)
 {
-   pFunction appEntry;
-   uint32_t  appStack;
+   return 0;
+}
 
-   /* Get application stack pointer (first entry in vector table) */
-   appStack = (uint32_t) *((__IO uint32_t *) APP_ADDRESS);
+int8_t USARTx_Tx(USART_TypeDef *USARTx, uint8_t *data, uint8_t lenght)
+{
+   return 0;
+}
 
-   /* Get application entry point (second entry in vector table) */
-   appEntry = (pFunction) * ((__IO uint32_t *) (APP_ADDRESS + 4U));
+int8_t USARTx_Rx(USART_TypeDef *USARTx, uint8_t *data, uint8_t lenght)
+{
+   return 0;
+}
 
-   /*Reconfigure vector table offset register to point to the application */
-   SCB->VTOR = APP_ADDRESS;
-
-   /* Set main stack pointer */
-   __set_MSP(appStack);
-
-   /* Jump to application */
-   appEntry();
-
-   while (1)
-   {
-   }
+int8_t USART2_Init(void)
+{
+   return 0;
 }

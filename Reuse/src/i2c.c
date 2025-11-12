@@ -178,7 +178,11 @@ I2c_Drv_Status_T I2C_Init(I2C_TypeDef *dev)
    {
       if (I2C2 == dev)
       {
+#ifdef STM32F103xB
          LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_GPIOB);
+#elif STM32F401xC
+         LL_APB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOB);
+#endif
          LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C2);
 
          LL_GPIO_SetPinMode(GPIOB, I2C2_SCL_PIN, LL_GPIO_MODE_ALTERNATE);

@@ -6,14 +6,25 @@ SRC_DRIVERS := $(wildcard $(SRC_DRIVERS_DIR)/*.c)
 PATH_REUSE_DIR := tools/Reuse
 SRC_REUSE := $(shell find $(PATH_REUSE_DIR) -type f -name "*.c")
 
-PATH_SBL_DIR := tools/bootloader/src
-SRC_SBL := $(foreach dir, $(PATH_SBL_DIR), $(wildcard $(dir)/*.c))
+PATH_SBL_BASE_DIR := tools/bootloader
+ifeq ($(DEVICE),STM32F103xB)
+	PATH_SBL_MACH_DIR := $(PATH_SBL_BASE_DIR)/stm32f103c8tx
+	PATH_SBL_DIR := $(PATH_SBL_BASE_DIR)/src $(PATH_SBL_MACH_DIR)
+else ifeq ($(DEVICE),STM32F401xC)
+	PATH_SBL_MACH_DIR := $(PATH_SBL_BASE_DIR)/stm32f401ccux
+	PATH_SBL_DIR := $(PATH_SBL_BASE_DIR)/src $(PATH_SBL_MACH_DIR)
+else
+	PATH_SBL_MACH_DIR :=
+	PATH_SBL_DIR :=
+endif
+
+SRC_SBL := $(foreach dir,$(PATH_SBL_DIR),$(shell find $(dir) -type f -name "*.c"))
 
 ifdef USE_FREERTOS
 	ifeq ($(USE_FREERTOS), yes)
-		PATH_RTOS_DIR := tools/FreeRTOS-Kernel
-		SRC_RTOS_DIR_PORT := tools/FreeRTOS-Kernel/portable/GCC/ARM_CM4F
-		SRC_RTOS_DIR_HEAP := tools/FreeRTOS-Kernel/portable/MemMang
+		PATH_RTOS_DIR := tools/freertos
+		SRC_RTOS_DIR_PORT := tools/freertos/portable/GCC/ARM_CM4F
+		SRC_RTOS_DIR_HEAP := tools/freertos/portable/MemMang
 		SRC_RTOS := $(foreach dir, $(PATH_RTOS_DIR), $(wildcard $(dir)/*.c))
 	endif
 endif
@@ -21,11 +32,11 @@ endif
 OBJ_CORE := $(patsubst Core/%.c, $(OBJ_DIR)/%.o, $(SRC_CORE))
 OBJ_DRIVERS := $(SRC_DRIVERS:$(SRC_DRIVERS_DIR)/%.c=$(DRIVER_DIR)/%.o)
 OBJ_REUSE := $(patsubst $(PATH_REUSE_DIR)/%.c,$(REUSE_DIR)/%.o,$(SRC_REUSE))
-OBJ_SBL := $(SRC_SBL:$(PATH_SBL_DIR)/%.c=$(SBL_DIR)/%.o)
+OBJ_SBL := $(patsubst $(PATH_SBL_BASE_DIR)/%.c,$(SBL_DIR)/%.o,$(SRC_SBL))
 
 ifdef USE_FREERTOS
 	ifeq ($(USE_FREERTOS), yes)
-		OBJ_RTOS := $(patsubst tools/FreeRTOS-Kernel/%.c, $(RTOS_DIR)/%.o, $(SRC_RTOS))
+		OBJ_RTOS := $(patsubst tools/freertos/%.c, $(RTOS_DIR)/%.o, $(SRC_RTOS))
 		OBJ_RTOS += out/RTOS/port.o
 		ifeq ($(FREERTOS_HEAP), heap_1)
 			OBJ_RTOS += out/RTOS/heap_1.o
@@ -57,8 +68,9 @@ $(REUSE_DIR)/%.o: $(PATH_REUSE_DIR)/%.c
 	@mkdir -p $(dir $@)
 	$(SILENTMODE_FLAG) $(CC) $(CFLAGS) $(CONST) $(DEBUGINFO) $(INC) $< -o $@
 
-$(SBL_DIR)/%.o: $(PATH_SBL_DIR)/%.c
+$(SBL_DIR)/%.o: $(PATH_SBL_BASE_DIR)/%.c
 	@echo "Compiling $< -> $@"
+	@mkdir -p $(dir $@)
 	$(SILENTMODE_FLAG) $(CC) $(CFLAGS) $(CONST) $(DEBUGINFO) $(INC) $< -o $@
 
 ifdef USE_FREERTOS
@@ -82,7 +94,7 @@ $(OBJ_DIR)/$(NAME_STARTUP_FILE).o: Core/Startup/$(NAME_STARTUP_FILE).s
 	@echo "Compiling $< -> $@"
 	$(SILENTMODE_FLAG) $(CC) $(CFLAGS) $(CONST) $(DEBUGINFO) $< -o $@
 
-$(SBL_DIR)/sbl_startup_stm32f103c8tx.o: $(PATH_SBL_DIR)/sbl_startup_stm32f103c8tx.s
+$(SBL_DIR)/$(NAME_SBL_STARTUP_FILE).o: $(PATH_SBL_MACH_DIR)/$(NAME_SBL_STARTUP_FILE).s
 	@echo "Compiling $< -> $@"
 	$(SILENTMODE_FLAG) $(CC) $(CFLAGS) $(CONST) $(DEBUGINFO) $< -o $@
 

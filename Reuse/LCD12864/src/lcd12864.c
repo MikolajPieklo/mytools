@@ -16,8 +16,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef STM32F103xB
 #include <stm32f1xx_ll_bus.h>
 #include <stm32f1xx_ll_gpio.h>
+#elif STM32F401xC
+#include <stm32f4xx_ll_bus.h>
+#include <stm32f4xx_ll_gpio.h>
+#else
+#error Module not supported!
+#endif
 
 #include <delay.h>
 #include <log.h>
@@ -80,7 +87,11 @@ extern const uint8_t Font16_Table[];
  ************************************/
 static void lcd12864_init_gpio(void)
 {
+#ifdef STM32F103xB
    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_GPIOB);
+#elif STM32F401xC
+   LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOB);
+#endif
 
    LL_GPIO_SetPinMode(GPIOB, LCD12864_RST_PIN, LL_GPIO_MODE_OUTPUT);
    LL_GPIO_SetOutputPin(GPIOB, LCD12864_RST_PIN);

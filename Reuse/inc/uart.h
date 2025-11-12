@@ -1,14 +1,14 @@
 /**
  ********************************************************************************
- * @file    spi.h
+ * @file    uart.h
  * @author  Mikolaj Pieklo
- * @date    29.11.2024
+ * @date    10.11.2025
  * @brief
  ********************************************************************************
  */
 
-#ifndef __SPI_H__
-#define __SPI_H__
+#ifndef __UART_H__
+#define __UART_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,28 +17,18 @@ extern "C" {
 /************************************
  * INCLUDES
  ************************************/
-#include <stdint.h>
-
 #ifdef STM32F103xB
-#include <stm32f1xx_ll_gpio.h>
-#include <stm32f1xx_ll_spi.h>
+#include <stm32f1xx_ll_uart.h>
 #elif STM32F401xC
-#include <stm32f4xx_ll_gpio.h>
-#include <stm32f4xx_ll_spi.h>
+#include <stm32f4xx_ll_usart.h>
 #else
 #error Module not supported!
 #endif
 
+#include <stdint.h>
 /************************************
  * MACROS AND DEFINES
  ************************************/
-#define SPI1_CS1_Pin  LL_GPIO_PIN_4
-#define SPI1_CS2_Pin  LL_GPIO_PIN_1
-#define SPI1_SCK_Pin  LL_GPIO_PIN_5
-#define SPI1_MISO_Pin LL_GPIO_PIN_6
-#define SPI1_MOSI_Pin LL_GPIO_PIN_7
-#define SPI2_SCK_Pin  LL_GPIO_PIN_13
-#define SPI2_MOSI_Pin LL_GPIO_PIN_15
 
 /************************************
  * TYPEDEFS
@@ -51,10 +41,15 @@ extern "C" {
 /************************************
  * GLOBAL FUNCTION PROTOTYPES
  ************************************/
-void    SPI1_Init(void);
-void    SPI2_Init(void);
-uint8_t SPI_Transfer(SPI_TypeDef *dev, uint32_t cs_pin, uint8_t *tx_data, uint8_t *rx_data,
-                     uint8_t n);
+int8_t USARTx_Set_BaudRate(USART_TypeDef *USARTx, uint32_t baudRate);
+
+int8_t USARTx_Tx(USART_TypeDef *USARTx, uint8_t *data, uint8_t lenght);
+
+int8_t USARTx_Rx(USART_TypeDef *USARTx, uint8_t *data, uint8_t lenght);
+
+int8_t USART2_Init(void);
+
+
 
 #ifdef __cplusplus
 }

@@ -12,8 +12,13 @@
  ************************************/
 #include "crc8.h"
 
+#ifdef STM32F103xB
 #include "stm32f1xx_ll_utils.h"
-
+#elif STM32F401xC
+#include "stm32f4xx_ll_utils.h"
+#else
+#error Module not supported!
+#endif
 /************************************
  * EXTERN VARIABLES
  ************************************/

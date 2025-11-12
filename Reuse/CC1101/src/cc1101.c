@@ -9,9 +9,18 @@
 
 #include <stdio.h>
 
+#ifdef STM32F103xB
 #include <stm32f1xx_ll_bus.h>
 #include <stm32f1xx_ll_gpio.h>
 #include <stm32f1xx_ll_spi.h>
+#elif STM32F401xC
+#include <stm32f4xx_ll_bus.h>
+#include <stm32f4xx_ll_gpio.h>
+#include <stm32f4xx_ll_spi.h>
+#else
+#error Module not supported!
+#endif
+
 
 #include "cc1101_reg.h"
 #include <delay.h>
@@ -52,7 +61,12 @@ static uint8_t cc1101_get_lqi(void);
 
 void CC1101_Init(uint8_t addr)
 {
+#ifdef STM32F103xB
    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_GPIOB);
+#elif STM32F401xC
+   LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOB);
+#endif
+
    LL_GPIO_SetPinMode(GPIOB, CC1101_GDO0_Pin, LL_GPIO_MODE_INPUT);
    LL_GPIO_SetPinMode(GPIOB, CC1101_GDO2_Pin, LL_GPIO_MODE_INPUT);
 

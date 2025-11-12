@@ -10,10 +10,20 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#ifdef STM32F103xB
 #include <stm32f1xx_ll_bus.h>
 #include <stm32f1xx_ll_exti.h>
 #include <stm32f1xx_ll_gpio.h>
 #include <stm32f1xx_ll_spi.h>
+#elif STM32F401xC
+#include <stm32f4xx_ll_bus.h>
+#include <stm32f4xx_ll_exti.h>
+#include <stm32f4xx_ll_gpio.h>
+#include <stm32f4xx_ll_spi.h>
+#include <stm32f4xx_ll_system.h>
+#else
+#error Module not supported!
+#endif
 
 #include <delay.h>
 #include <log.h>
@@ -134,7 +144,11 @@ RadioStatus_t SI4432_Init(void)
 {
    uint8_t data;
 
+#ifdef STM32F103xB
    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_GPIOB);
+#elif STM32F401xC
+   LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOB);
+#endif
 
    LL_GPIO_SetPinMode(GPIOB, LL_GPIO_PIN_7, LL_GPIO_MODE_OUTPUT);
    LL_GPIO_SetPinSpeed(GPIOB, LL_GPIO_PIN_7, LL_GPIO_SPEED_FREQ_HIGH);
@@ -147,8 +161,13 @@ RadioStatus_t SI4432_Init(void)
    LL_GPIO_SetPinMode(GPIOB, LL_GPIO_PIN_6, LL_GPIO_MODE_INPUT);
 
    /* -2- Connect External Line to the GPIO*/
+#ifdef STM32F103xB
    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_AFIO);
    LL_GPIO_AF_SetEXTISource(LL_GPIO_AF_EXTI_PORTB, LL_GPIO_AF_EXTI_LINE6);
+#elif STM32F401xC
+   LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SYSCFG);
+   LL_SYSCFG_SetEXTISource(LL_SYSCFG_EXTI_PORTB, LL_SYSCFG_EXTI_LINE6);
+#endif
 
    /*-3- Enable a falling trigger EXTI line 13 Interrupt */
    /* Set fields of initialization structure */

@@ -14,7 +14,13 @@
 
 #include <stddef.h>
 
+#ifdef STM32F103xB
 #include <stm32f1xx_ll_bus.h>
+#elif STM32F401xC
+#include <stm32f4xx_ll_bus.h>
+#else
+#error Module not supported!
+#endif
 
 /************************************
  * EXTERN VARIABLES
@@ -49,7 +55,11 @@
  ************************************/
 void SPI1_Init(void)
 {
+#ifdef STM32F103xB
    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_GPIOA);
+#elif STM32F401xC
+   LL_APB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOA);
+#endif
 
    LL_GPIO_SetPinMode(GPIOA, SPI1_CS1_Pin, LL_GPIO_MODE_OUTPUT);
    LL_GPIO_SetPinSpeed(GPIOA, SPI1_CS1_Pin, LL_GPIO_SPEED_FREQ_HIGH);
@@ -101,7 +111,11 @@ void SPI1_Init(void)
 
 void SPI2_Init(void)
 {
+#ifdef STM32F103xB
    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_GPIOB);
+#elif STM32F401xC
+   LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOB);
+#endif
 
    LL_GPIO_SetPinMode(GPIOB, SPI2_SCK_Pin, LL_GPIO_MODE_ALTERNATE);
    LL_GPIO_SetPinSpeed(GPIOB, SPI2_SCK_Pin, LL_GPIO_SPEED_FREQ_HIGH);

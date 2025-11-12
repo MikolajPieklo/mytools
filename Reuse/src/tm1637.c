@@ -12,8 +12,15 @@
  ************************************/
 #include "tm1637.h"
 
+#ifdef STM32F103xB
 #include <stm32f1xx_ll_bus.h>
 #include <stm32f1xx_ll_gpio.h>
+#elif STM32F401xC
+#include <stm32f4xx_ll_bus.h>
+#include <stm32f4xx_ll_gpio.h>
+#else
+#error Module not supported!
+#endif
 
 #include "delay.h"
 #include "device_info.h"
@@ -140,7 +147,12 @@ static inline void _tm1637DioLow(void)
  ************************************/
 void TM1637Init(void)
 {
+#ifdef STM32F103xB
    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_GPIOA);
+#elif STM32F401xC
+   LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOA);
+#endif
+
    LL_GPIO_InitTypeDef g = {0};
    g.Pull = LL_GPIO_PULL_UP;
    g.OutputType = LL_GPIO_OUTPUT_PUSHPULL; // LL_GPIO_OUTPUT_OPENDRAIN;
