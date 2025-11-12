@@ -27,6 +27,7 @@
 
 #include <delay.h>
 #include <log.h>
+#include <reuse.h>
 #include <si4432_reg.h>
 #include <spi.h>
 // B7 - SDN "0"
@@ -68,29 +69,29 @@ static uint8_t spi_write(uint8_t reg, uint8_t txdata)
 {
    si4432_spi_cs_low();
 
-   uint8_t data = 0;
    LL_SPI_TransmitData8(SPI1, reg);
    while (LL_SPI_IsActiveFlag_BSY(SPI1))
       ;
-   data = LL_SPI_ReceiveData8(SPI1);
+   LL_SPI_ReceiveData8(SPI1);
 
    LL_SPI_TransmitData8(SPI1, txdata);
    while (LL_SPI_IsActiveFlag_BSY(SPI1))
       ;
-   data = LL_SPI_ReceiveData8(SPI1);
+   LL_SPI_ReceiveData8(SPI1);
 
    si4432_spi_cs_high();
+
+   return 0;
 }
 
 static void spi_read(uint8_t reg, uint8_t *rxdata)
 {
    si4432_spi_cs_low();
 
-   uint8_t data = 0;
    LL_SPI_TransmitData8(SPI1, reg);
    while (LL_SPI_IsActiveFlag_BSY(SPI1))
       ;
-   data = LL_SPI_ReceiveData8(SPI1);
+   LL_SPI_ReceiveData8(SPI1);
 
    LL_SPI_TransmitData8(SPI1, 0xFF);
    while (LL_SPI_IsActiveFlag_BSY(SPI1))
@@ -360,10 +361,14 @@ uint8_t SI4432_Tx_Debug(void)
    spi_write(SI4432_WRITE | SI4432_R_DATA_ACCESS_CONTROL, 0xAD);
 
    spi_write(SI4432_WRITE | SI4432_R_OPERATING_FUNCTION_CONTROL_1, 0x09);
+
+   return 0;
 }
 
 uint8_t SI4432_isDataAvailable(uint8_t pipenum)
 {
+   UNUSED(pipenum);
+   return 0;
 }
 
 void SI4432_Rx_Debug(void)
@@ -414,6 +419,8 @@ void SI4432_Rx_Debug(void)
 
 void SI4432_TxMode(uint8_t *address, uint8_t channel)
 {
+   UNUSED(address);
+   UNUSED(channel);
 }
 
 void SI4432_RxMode(void)

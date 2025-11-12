@@ -12,6 +12,8 @@
  ************************************/
 #include "uart.h"
 
+#include <reuse.h>
+
 /************************************
  * EXTERN VARIABLES
  ************************************/
@@ -45,16 +47,24 @@
  ************************************/
 int8_t USARTx_Set_BaudRate(USART_TypeDef *USARTx, uint32_t baudRate)
 {
+   UNUSED(USARTx);
+   UNUSED(baudRate);
    return 0;
 }
 
 int8_t USARTx_Tx(USART_TypeDef *USARTx, uint8_t *data, uint8_t lenght)
 {
+   UNUSED(USARTx);
+   UNUSED(data);
+   UNUSED(lenght);
    return 0;
 }
 
 int8_t USARTx_Rx(USART_TypeDef *USARTx, uint8_t *data, uint8_t lenght)
 {
+   UNUSED(USARTx);
+   UNUSED(data);
+   UNUSED(lenght);
    return 0;
 }
 

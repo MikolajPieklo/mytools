@@ -31,11 +31,11 @@
 #define SI4432_R_ADC_VALUE                                  0x11
 #define SI4432_R_TEMPERATURE_SENSOR_CONTROL                 0x12
 #define SI4432_R_TEMPERATURE_VALUE_OFFSET                   0x13
-#define SI4432_R_WAKE                                       -UP_TIMER_PERIOD_1 0x14
-#define SI4432_R_WAKE                                       -UP_TIMER_PERIOD_2 0x15
-#define SI4432_R_WAKE                                       -UP_TIMER_PERIOD_3 0x16
-#define SI4432_R_WAKE                                       -UP_TIMER_VALUE_1 0x17
-#define SI4432_R_WAKE                                       -UP_TIMER_VALUE_2 0x18
+#define SI4432_R_WAKE_1                                     -UP_TIMER_PERIOD_1 0x14
+#define SI4432_R_WAKE_2                                     -UP_TIMER_PERIOD_2 0x15
+#define SI4432_R_WAKE_3                                     -UP_TIMER_PERIOD_3 0x16
+#define SI4432_R_WAKE_4                                     -UP_TIMER_VALUE_1 0x17
+#define SI4432_R_WAKE_5                                     -UP_TIMER_VALUE_2 0x18
 #define SI4432_R_LOW                                        -DUTY_CYCLE_MODE_DURATION 0x19
 #define SI4432_R_LOW_BATTERY_DETECTOR_THRESHOLD             0x1A
 #define SI4432_R_BATTERY_VOLTAGE_LEVEL                      0x1B

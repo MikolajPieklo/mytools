@@ -21,6 +21,7 @@
 #endif
 
 #include <delay.h>
+#include <reuse.h>
 #include <spi.h>
 
 #define NRF_CE_Pin LL_GPIO_PIN_7
@@ -91,11 +92,10 @@ static uint8_t spi_write(uint8_t data)
 
 static void spi_read(uint8_t reg, uint8_t *rxdata)
 {
-   uint8_t data = 0;
    LL_SPI_TransmitData8(SPI1, reg);
    while (LL_SPI_IsActiveFlag_BSY(SPI1))
       ;
-   data = LL_SPI_ReceiveData8(SPI1);
+   LL_SPI_ReceiveData8(SPI1);
 
    LL_SPI_TransmitData8(SPI1, 0xFF);
    while (LL_SPI_IsActiveFlag_BSY(SPI1))
@@ -112,7 +112,6 @@ static void nrf24_flush_rx(void)
 
 static void nrf24_flush_tx(void)
 {
-   uint8_t data = 0;
    nrf24_spi_cs_low();
    spi_write(NRF_FLUSH_TX);
    nrf24_spi_cs_high();
@@ -121,7 +120,6 @@ static void nrf24_flush_tx(void)
 static void nrf24_configure(void)
 {
    TS_Delay_ms(100);
-   uint8_t data = 0;
 
    nrf24_disable();
 
@@ -173,7 +171,6 @@ static void nrf24_configure(void)
 
 void NRF24_TxMode(uint8_t *address, uint8_t channel)
 {
-   uint8_t data = 0;
    nrf24_disable();
 
    /* 2400 +MHz*/
@@ -215,8 +212,10 @@ void NRF24_TxMode(uint8_t *address, uint8_t channel)
 
 void NRF24_RxMode(uint8_t *address, uint8_t channel)
 {
-   uint8_t data = 0;
-   uint8_t reg = 0;
+   UNUSED(address);
+   UNUSED(channel);
+
+   /* uint8_t reg = 0; */
    nrf24_disable();
 
    /* 2400 + 50 MHz*/
@@ -312,7 +311,6 @@ void nRF24_Debug(void)
 
 uint8_t nRF24_isDataAvailable(uint8_t pipenum)
 {
-   uint8_t data = 0;
    uint8_t status = 0;
 
    nrf24_spi_cs_low();
@@ -334,7 +332,6 @@ uint8_t nRF24_isDataAvailable(uint8_t pipenum)
 
 uint8_t nRF24_Tx_Debug(void)
 {
-   uint8_t data = 0;
    uint8_t fifostatus = 0;
 
    nrf24_spi_cs_low();
@@ -365,7 +362,6 @@ uint8_t nRF24_Tx_Debug(void)
 
 void nRF24_Rx_Debug(uint8_t *data)
 {
-   uint8_t fifostatus = 0;
    nrf24_spi_cs_low();
    spi_write(NRF_R_RX_PAYLOAD);
 

@@ -123,7 +123,7 @@ uint16_t Beep_Get_Warning_Status(void)
 #ifdef STM32F103xB
    return LL_RTC_BKP_GetRegister(BKP, LL_RTC_BKP_DR1);
 #elif STM32F401xC
-   LL_RTC_BAK_GetRegister(RTC, LL_RTC_BKP_DR1);
+   return LL_RTC_BAK_GetRegister(RTC, LL_RTC_BKP_DR1);
 #endif
 }
 
