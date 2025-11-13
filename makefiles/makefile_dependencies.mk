@@ -1,24 +1,24 @@
 
 SRC_CORE_DIR_WITHOUT_PREFIX := $(foreach dir, $(SRC_CORE_DIRS), $(patsubst Core/%, %, $(dir)))
 SRC_CORE := $(foreach dir, $(SRC_CORE_DIRS), $(wildcard $(dir)/*.c))
-SRC_DRIVERS := $(wildcard $(SRC_DRIVERS_DIR)/*.c)
+LIST_SRC_DRIVERS := $(wildcard $(SRC_DRIVERS_DIR)/*.c)
 
-PATH_REUSE_DIR := tools/Reuse
-SRC_REUSE := $(shell find $(PATH_REUSE_DIR) -type f -name "*.c")
+PATH_REUSE_BASE := tools/Reuse
+LIST_SRC_REUSE := $(shell find $(PATH_REUSE_BASE) -type f -name "*.c")
 
-PATH_SBL_BASE_DIR := tools/bootloader
+PATH_SBL_BASE := tools/bootloader
 ifeq ($(DEVICE),STM32F103xB)
-	PATH_SBL_MACH_DIR := $(PATH_SBL_BASE_DIR)/stm32f103c8tx
-	PATH_SBL_DIR := $(PATH_SBL_BASE_DIR)/src $(PATH_SBL_MACH_DIR)
+	PATH_SBL_MACH_DIR := $(PATH_SBL_BASE)/stm32f103c8tx
+	PATH_SBL_DIR := $(PATH_SBL_BASE)/src $(PATH_SBL_MACH_DIR)
 else ifeq ($(DEVICE),STM32F401xC)
-	PATH_SBL_MACH_DIR := $(PATH_SBL_BASE_DIR)/stm32f401ccux
-	PATH_SBL_DIR := $(PATH_SBL_BASE_DIR)/src $(PATH_SBL_MACH_DIR)
+	PATH_SBL_MACH_DIR := $(PATH_SBL_BASE)/stm32f401ccux
+	PATH_SBL_DIR := $(PATH_SBL_BASE)/src $(PATH_SBL_MACH_DIR)
 else
 	PATH_SBL_MACH_DIR :=
 	PATH_SBL_DIR :=
 endif
 
-SRC_SBL := $(foreach dir,$(PATH_SBL_DIR),$(shell find $(dir) -type f -name "*.c"))
+LIST_SRC_SBL := $(foreach dir,$(PATH_SBL_DIR),$(shell find $(dir) -type f -name "*.c"))
 
 ifdef USE_FREERTOS
 	ifeq ($(USE_FREERTOS), yes)
@@ -30,9 +30,9 @@ ifdef USE_FREERTOS
 endif
 
 OBJ_CORE := $(patsubst Core/%.c, $(OBJ_DIR)/%.o, $(SRC_CORE))
-OBJ_DRIVERS := $(SRC_DRIVERS:$(SRC_DRIVERS_DIR)/%.c=$(DRIVER_DIR)/%.o)
-OBJ_REUSE := $(patsubst $(PATH_REUSE_DIR)/%.c,$(REUSE_DIR)/%.o,$(SRC_REUSE))
-OBJ_SBL := $(patsubst $(PATH_SBL_BASE_DIR)/%.c,$(SBL_DIR)/%.o,$(SRC_SBL))
+OBJ_DRIVERS := $(LIST_SRC_DRIVERS:$(SRC_DRIVERS_DIR)/%.c=$(DRIVER_DIR)/%.o)
+OBJ_REUSE := $(patsubst $(PATH_REUSE_BASE)/%.c,$(REUSE_DIR)/%.o,$(LIST_SRC_REUSE))
+OBJ_SBL := $(patsubst $(PATH_SBL_BASE)/%.c,$(SBL_DIR)/%.o,$(LIST_SRC_SBL))
 
 ifdef USE_FREERTOS
 	ifeq ($(USE_FREERTOS), yes)
@@ -63,12 +63,12 @@ $(DRIVER_DIR)/%.o: $(SRC_DRIVERS_DIR)/%.c
 	@echo "Compiling $< -> $@"
 	$(SILENTMODE_FLAG) $(CC) $(CFLAGS) $(CONST) $(DEBUGINFO) $(INC) $< -o $@
 
-$(REUSE_DIR)/%.o: $(PATH_REUSE_DIR)/%.c
+$(REUSE_DIR)/%.o: $(PATH_REUSE_BASE)/%.c
 	@echo "Compiling $< -> $@"
 	@mkdir -p $(dir $@)
 	$(SILENTMODE_FLAG) $(CC) $(CFLAGS) $(CONST) $(DEBUGINFO) $(INC) $< -o $@
 
-$(SBL_DIR)/%.o: $(PATH_SBL_BASE_DIR)/%.c
+$(SBL_DIR)/%.o: $(PATH_SBL_BASE)/%.c
 	@echo "Compiling $< -> $@"
 	@mkdir -p $(dir $@)
 	$(SILENTMODE_FLAG) $(CC) $(CFLAGS) $(CONST) $(DEBUGINFO) $(INC) $< -o $@
