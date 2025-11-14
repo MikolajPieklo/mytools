@@ -18,7 +18,7 @@ extern "C" {
  * INCLUDES
  ************************************/
 #ifdef STM32F103xB
-#include <stm32f1xx_ll_uart.h>
+#include <stm32f1xx_ll_usart.h>
 #elif STM32F401xC
 #include <stm32f4xx_ll_usart.h>
 #else
@@ -41,14 +41,16 @@ extern "C" {
 /************************************
  * GLOBAL FUNCTION PROTOTYPES
  ************************************/
+
+int8_t UART1_Init(void);
+
+int8_t USART2_Init(void);
+
 int8_t USARTx_Set_BaudRate(USART_TypeDef *USARTx, uint32_t baudRate);
 
 int8_t USARTx_Tx(USART_TypeDef *USARTx, uint8_t *data, uint8_t lenght);
 
 int8_t USARTx_Rx(USART_TypeDef *USARTx, uint8_t *data, uint8_t lenght);
-
-int8_t USART2_Init(void);
-
 
 
 #ifdef __cplusplus
