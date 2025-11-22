@@ -31,12 +31,34 @@
 /************************************
  * PRIVATE MACROS AND DEFINES
  ************************************/
-// Configuration.
-
+/* Configuration */
 #define CLK_PORT GPIOA
 #define DIO_PORT GPIOA
 #define CLK_PIN  LL_GPIO_PIN_5
 #define DIO_PIN  LL_GPIO_PIN_7
+
+/* TM1637 COMMANDS */
+#define TM1637_CMD_DATA_SET            0x40
+#define TM1637_CMD_DISPLAT_CONTROL_SET 0x80
+#define TM1637_CMD_ADDRESS_SET         0xC0
+
+#define TM1637_DISPLAY_ON  0x08
+#define TM1637_DISPLAY_OFF 0x00
+
+/* TM1637 BRIGHTNRESS */
+#define TM1637_BRIGHTNESS_0 0x00
+#define TM1637_BRIGHTNESS_1 0x01
+#define TM1637_BRIGHTNESS_2 0x02
+#define TM1637_BRIGHTNESS_3 0x03
+#define TM1637_BRIGHTNESS_4 0x04
+#define TM1637_BRIGHTNESS_5 0x05
+#define TM1637_BRIGHTNESS_6 0x06
+#define TM1637_BRIGHTNESS_7 0x07
+
+/* TM1637 CHAR */
+#define TM1637_CHAR_H 0x76
+#define TM1637_CHAR_E 0x79
+#define TM1637_CHAR_L 0x38
 
 /************************************
  * PRIVATE TYPEDEFS
@@ -55,10 +77,10 @@ const char segmentMap[] = {0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, // 0-
 /************************************
  * STATIC FUNCTION PROTOTYPES
  ************************************/
-static void        _tm1637Start(void);
-static void        _tm1637Stop(void);
-static void        _tm1637ReadResult(void);
-static void        _tm1637WriteByte(uint8_t b);
+static inline void _tm1637Start(void);
+static inline void _tm1637Stop(void);
+static inline void _tm1637ReadResult(void);
+static inline void _tm1637WriteByte(uint8_t b);
 static inline void _tm1637DelayUsec(uint32_t i);
 static inline void _tm1637ClkHigh(void);
 static inline void _tm1637ClkLow(void);
@@ -68,7 +90,7 @@ static inline void _tm1637DioLow(void);
 /************************************
  * STATIC FUNCTIONS
  ************************************/
-static void _tm1637Start(void)
+static inline void _tm1637Start(void)
 {
    _tm1637ClkHigh();
    _tm1637DioHigh();
@@ -76,7 +98,7 @@ static void _tm1637Start(void)
    _tm1637DioLow();
 }
 
-static void _tm1637Stop(void)
+static inline void _tm1637Stop(void)
 {
    _tm1637ClkLow();
    _tm1637DelayUsec(2);
@@ -87,7 +109,7 @@ static void _tm1637Stop(void)
    _tm1637DioHigh();
 }
 
-static void _tm1637ReadResult(void)
+static inline void _tm1637ReadResult(void)
 {
    _tm1637ClkLow();
    _tm1637DelayUsec(5);
@@ -97,7 +119,7 @@ static void _tm1637ReadResult(void)
    _tm1637ClkLow();
 }
 
-static void _tm1637WriteByte(uint8_t b)
+__attribute__((optimize("O0"))) static inline void _tm1637WriteByte(uint8_t b)
 {
    for (int i = 0; i < 8; ++i)
    {
@@ -163,7 +185,7 @@ void TM1637Init(void)
    g.Pin = DIO_PIN;
    LL_GPIO_Init(DIO_PORT, &g);
 
-   TM1637SetBrightness(8);
+   TM1637SetBrightness(TM1637_BRIGHTNESS_7);
 }
 
 void TM1637DisplayDecimal(int v, int displaySeparator)
@@ -180,12 +202,12 @@ void TM1637DisplayDecimal(int v, int displaySeparator)
    }
 
    _tm1637Start();
-   _tm1637WriteByte(0x40);
+   _tm1637WriteByte(TM1637_CMD_DATA_SET);
    _tm1637ReadResult();
    _tm1637Stop();
 
    _tm1637Start();
-   _tm1637WriteByte(0xc0);
+   _tm1637WriteByte(TM1637_CMD_ADDRESS_SET);
    _tm1637ReadResult();
 
    for (int i = 0; i < 4; ++i)
@@ -199,7 +221,7 @@ void TM1637DisplayDecimal(int v, int displaySeparator)
 
 // Valid brightness values: 0 - 8.
 // 0 = display off.
-void TM1637SetBrightness(char brightness)
+void TM1637SetBrightness(uint8_t brightness)
 {
    // Brightness command:
    // 1000 0XXX = display off
@@ -207,7 +229,7 @@ void TM1637SetBrightness(char brightness)
    // X = don't care
    // B = brightness
    _tm1637Start();
-   _tm1637WriteByte(0x87 + brightness);
+   _tm1637WriteByte(TM1637_CMD_DISPLAT_CONTROL_SET | TM1637_DISPLAY_ON | brightness);
    _tm1637ReadResult();
    _tm1637Stop();
 }
@@ -217,17 +239,17 @@ void TM1637ShowError(void)
    uint8_t i;
 
    _tm1637Start();
-   _tm1637WriteByte(0x40);
+   _tm1637WriteByte(TM1637_CMD_DATA_SET);
    _tm1637ReadResult();
    _tm1637Stop();
 
    _tm1637Start();
-   _tm1637WriteByte(0xc0);
+   _tm1637WriteByte(TM1637_CMD_ADDRESS_SET);
    _tm1637ReadResult();
 
    for (i = 0; i < 4; i++)
    {
-      _tm1637WriteByte(0x79);
+      _tm1637WriteByte(TM1637_CHAR_E);
       _tm1637ReadResult();
    }
 
@@ -238,25 +260,25 @@ void TM1637ShowStartMessage(void)
 {
    Device_Restart_Issue_T restart = Device_Info_Get_Restart_Issue();
    _tm1637Start();
-   _tm1637WriteByte(0x40);
+   _tm1637WriteByte(TM1637_CMD_DATA_SET);
    _tm1637ReadResult();
    _tm1637Stop();
 
    _tm1637Start();
-   _tm1637WriteByte(0xc0);
+   _tm1637WriteByte(TM1637_CMD_ADDRESS_SET);
    _tm1637ReadResult();
 
    // Error issue code
    _tm1637WriteByte(segmentMap[restart]);
    _tm1637ReadResult();
    // H
-   _tm1637WriteByte(0x76);
+   _tm1637WriteByte(TM1637_CHAR_H);
    _tm1637ReadResult();
    // E
-   _tm1637WriteByte(0x79);
+   _tm1637WriteByte(TM1637_CHAR_E);
    _tm1637ReadResult();
    // L
-   _tm1637WriteByte(0x38);
+   _tm1637WriteByte(TM1637_CHAR_L);
    _tm1637ReadResult();
 
    _tm1637Stop();

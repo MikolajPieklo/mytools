@@ -36,6 +36,10 @@ extern volatile CirBuff_T cb_uart1_rx;
 /************************************
  * PRIVATE MACROS AND DEFINES
  ************************************/
+#define USART1_RX_PIN LL_GPIO_PIN_10
+#define USART1_TX_PIN LL_GPIO_PIN_9
+
+#define USART2_TX_RX_PIN LL_GPIO_PIN_2
 
 /************************************
  * PRIVATE TYPEDEFS
@@ -67,13 +71,10 @@ int8_t UART1_Init(void)
 
    /* Peripheral clock enable */
    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_USART1);
-
    LL_AHB1_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_GPIOA);
-   /**USART1 GPIO Configuration
-   PA9   ------> USART1_TX
-   PA10   ------> USART1_RX
-   */
-   GPIO_InitStruct.Pin = LL_GPIO_PIN_9;
+
+   /*USART1 GPIO Configuration */
+   GPIO_InitStruct.Pin = USART1_TX_PIN;
    GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
    GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_HIGH;
    GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
@@ -85,9 +86,6 @@ int8_t UART1_Init(void)
    NVIC_SetPriority(USART1_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 0));
    NVIC_EnableIRQ(USART1_IRQn);
 
-   /* USER CODE BEGIN USART1_Init 1 */
-
-   /* USER CODE END USART1_Init 1 */
    LL_USART_Disable(USART1);
    USART_InitStruct.BaudRate = 115200;
    USART_InitStruct.DataWidth = LL_USART_DATAWIDTH_8B;
@@ -117,7 +115,7 @@ int8_t USART2_Init(void)
    LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_USART2);
    LL_AHB1_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_GPIOA);
 
-   GPIO_InitStruct.Pin = LL_GPIO_PIN_2;
+   GPIO_InitStruct.Pin = USART2_TX_RX_PIN;
    GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
    GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_HIGH;
    GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_OPENDRAIN;

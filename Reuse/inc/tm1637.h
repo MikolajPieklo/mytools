@@ -17,6 +17,7 @@ extern "C" {
 /************************************
  * INCLUDES
  ************************************/
+#include <stdint.h>
 
 /************************************
  * MACROS AND DEFINES
@@ -33,10 +34,9 @@ extern "C" {
 /************************************
  * GLOBAL FUNCTION PROTOTYPES
  ************************************/
-
 void TM1637Init(void);
 void TM1637DisplayDecimal(int v, int displaySeparator);
-void TM1637SetBrightness(char brightness);
+void TM1637SetBrightness(uint8_t brightness);
 void TM1637ShowError(void);
 void TM1637ShowStartMessage(void);
 
