@@ -70,7 +70,7 @@ uint32_t i2c_start_time_ms = 0U;
  ************************************/
 static inline int8_t i2c_start(I2C_TypeDef *dev, uint8_t timeout);
 static inline int8_t i2c_stop(I2C_TypeDef *dev, uint8_t timeout);
-static inline int8_t i2c_send_address(I2C_TypeDef *dev, uint8_t addr, i2c_frame_mode_t mode,
+static inline int8_t i2c_send_address(I2C_TypeDef *dev, uint8_t dev_address, i2c_frame_mode_t mode,
                                       uint8_t timeout);
 static inline int8_t i2c_send_data(I2C_TypeDef *dev, uint8_t *data, uint8_t timeout);
 static inline int8_t i2c_receive_data(I2C_TypeDef *dev, uint8_t *data, uint8_t timeout);
@@ -112,7 +112,7 @@ static inline int8_t i2c_send_address(I2C_TypeDef *dev, uint8_t addr, i2c_frame_
                                       uint8_t timeout)
 {
    int8_t status = 0;
-   LL_I2C_TransmitData8(dev, (addr) | mode);
+   LL_I2C_TransmitData8(dev, (addr | mode));
    while ((!LL_I2C_IsActiveFlag_ADDR(dev)) && (!is_TimeOut(timeout)))
    {
    }
@@ -249,9 +249,11 @@ int8_t I2C_Master_Scan(I2C_TypeDef *dev, uint32_t timeout)
    return 0;
 }
 
-int8_t I2C_Master_Write(I2C_TypeDef *dev, uint8_t address, uint8_t data, uint32_t timeout)
+int8_t I2C_Master_Write(I2C_TypeDef *dev, uint8_t dev_address, uint8_t *data, uint8_t size,
+                        uint32_t timeout)
 {
-   int8_t status = 0;
+   int8_t  status = 0;
+   uint8_t idx = 0u;
 
    do
    {
@@ -260,24 +262,34 @@ int8_t I2C_Master_Write(I2C_TypeDef *dev, uint8_t address, uint8_t data, uint32_
       status = i2c_start(dev, timeout);
       if (status < 0)
       {
+         log_err(&i2c_dev, "start%x\r\n", dev_address);
          break;
       }
 
-      status = i2c_send_address(dev, address, I2C_WRITE_MODE, timeout);
+      status = i2c_send_address(dev, dev_address, I2C_WRITE_MODE, timeout);
       if (status < 0)
       {
+         log_err(&i2c_dev, "addres %x\r\n", dev_address);
          break;
       }
 
-      status = i2c_send_data(dev, &data, timeout);
-      if (status < 0)
+      if (0 < size)
       {
-         break;
+         for (idx = 0; idx < size; idx++)
+         {
+            status = i2c_send_data(dev, data + idx, timeout);
+            if (status < 0)
+            {
+               break;
+               log_err(&i2c_dev, "data %x\r\n", dev_address);
+            }
+         }
       }
 
       status = i2c_stop(dev, timeout);
       if (status < 0)
       {
+         log_err(&i2c_dev, "stop %x\r\n", dev_address);
          break;
       }
    }
@@ -285,7 +297,7 @@ int8_t I2C_Master_Write(I2C_TypeDef *dev, uint8_t address, uint8_t data, uint32_
    return status;
 }
 
-int8_t I2C_Master_Read(I2C_TypeDef *dev, uint8_t address, uint8_t *data, uint8_t len,
+int8_t I2C_Master_Read(I2C_TypeDef *dev, uint8_t dev_address, uint8_t *data, uint8_t len,
                        uint32_t timeout)
 {
    int8_t  status = 0;
@@ -294,25 +306,33 @@ int8_t I2C_Master_Read(I2C_TypeDef *dev, uint8_t address, uint8_t *data, uint8_t
    do
    {
       i2c_start_time_ms = TS_Get_ms();
-      LL_I2C_AcknowledgeNextData(dev, LL_I2C_ACK);
 
       status = i2c_start(dev, timeout);
       if (status < 0)
       {
+         log_err(&i2c_dev, "start %x\r\n", dev_address);
          break;
       }
 
-      status = i2c_send_address(dev, address, I2C_READ_MODE, timeout);
+      status = i2c_send_address(dev, dev_address, I2C_READ_MODE, timeout);
       if (status < 0)
       {
+         log_err(&i2c_dev, "addres %x\r\n", dev_address);
          break;
       }
 
       for (idx = 0; idx < len; idx++)
       {
-         if (idx == len - 1)
+         if (idx > len - 1)
          {
             LL_I2C_AcknowledgeNextData(dev, LL_I2C_NACK);
+#ifdef STM32F103xB
+            status = i2c_stop(dev, timeout);
+            if (status < 0)
+            {
+               break;
+            }
+#endif
          }
          else
          {
@@ -322,23 +342,27 @@ int8_t I2C_Master_Read(I2C_TypeDef *dev, uint8_t address, uint8_t *data, uint8_t
          status = i2c_receive_data(dev, (data + idx), timeout);
          if (status < 0)
          {
+            log_err(&i2c_dev, "read %x\r\n", dev_address);
             break;
          }
       }
 
+#ifdef STM32F401xC
       // Stop
       status = i2c_stop(dev, timeout);
       if (status < 0)
       {
+         log_err(&i2c_dev, "stop %x\r\n", dev_address);
          break;
       }
+#endif
    }
    while (0);
    return status;
 }
 
-int8_t I2C_Master_Reg8_Transmit_Byte(I2C_TypeDef *dev, uint8_t address, uint8_t reg, uint8_t data,
-                                     uint32_t timeout)
+int8_t I2C_Master_Reg8_Transmit_Byte(I2C_TypeDef *dev, uint8_t dev_address, uint8_t reg,
+                                     uint8_t data, uint32_t timeout)
 {
    int8_t status = 0;
 
@@ -352,7 +376,7 @@ int8_t I2C_Master_Reg8_Transmit_Byte(I2C_TypeDef *dev, uint8_t address, uint8_t 
          break;
       }
 
-      status = i2c_send_address(dev, address, I2C_WRITE_MODE, timeout);
+      status = i2c_send_address(dev, dev_address, I2C_WRITE_MODE, timeout);
       if (status < 0)
       {
          break;
@@ -380,8 +404,8 @@ int8_t I2C_Master_Reg8_Transmit_Byte(I2C_TypeDef *dev, uint8_t address, uint8_t 
    return status;
 }
 
-int8_t I2C_Master_Reg16_Transmit_Byte(I2C_TypeDef *dev, uint8_t address, uint16_t reg, uint8_t data,
-                                      uint32_t timeout)
+int8_t I2C_Master_Reg16_Transmit_Byte(I2C_TypeDef *dev, uint8_t dev_address, uint16_t reg,
+                                      uint8_t data, uint32_t timeout)
 {
    int8_t  status = 0;
    uint8_t reg_high = (reg >> 8) & 0xFF;
@@ -397,7 +421,7 @@ int8_t I2C_Master_Reg16_Transmit_Byte(I2C_TypeDef *dev, uint8_t address, uint16_
          break;
       }
 
-      status = i2c_send_address(dev, address, I2C_WRITE_MODE, timeout);
+      status = i2c_send_address(dev, dev_address, I2C_WRITE_MODE, timeout);
       if (status < 0)
       {
          break;
@@ -431,8 +455,8 @@ int8_t I2C_Master_Reg16_Transmit_Byte(I2C_TypeDef *dev, uint8_t address, uint16_
    return status;
 }
 
-int8_t I2C_Master_Reg8_Transmit_Bytes(I2C_TypeDef *dev, uint8_t address, uint8_t reg, uint8_t *data,
-                                      uint8_t len, uint32_t timeout)
+int8_t I2C_Master_Reg8_Transmit_Bytes(I2C_TypeDef *dev, uint8_t dev_address, uint8_t reg,
+                                      uint8_t *data, uint8_t len, uint32_t timeout)
 {
    int8_t  status = 0;
    uint8_t idx = 0;
@@ -447,7 +471,7 @@ int8_t I2C_Master_Reg8_Transmit_Bytes(I2C_TypeDef *dev, uint8_t address, uint8_t
          break;
       }
 
-      status = i2c_send_address(dev, address, I2C_WRITE_MODE, timeout);
+      status = i2c_send_address(dev, dev_address, I2C_WRITE_MODE, timeout);
       if (status < 0)
       {
          break;
@@ -459,7 +483,7 @@ int8_t I2C_Master_Reg8_Transmit_Bytes(I2C_TypeDef *dev, uint8_t address, uint8_t
          break;
       }
 
-      for (idx = 0; idx < len; idx++)
+      for (idx = 0; idx < len - 1; idx++)
       {
          status = i2c_send_data(dev, (data + idx), timeout);
          if (status < 0)
@@ -478,7 +502,7 @@ int8_t I2C_Master_Reg8_Transmit_Bytes(I2C_TypeDef *dev, uint8_t address, uint8_t
    return status;
 }
 
-int8_t I2C_Master_Reg16_Transmit_Bytes(I2C_TypeDef *dev, uint8_t address, uint16_t reg,
+int8_t I2C_Master_Reg16_Transmit_Bytes(I2C_TypeDef *dev, uint8_t dev_address, uint16_t reg,
                                        uint8_t *data, uint8_t len, uint32_t timeout)
 {
    int8_t  status = 0;
@@ -496,7 +520,7 @@ int8_t I2C_Master_Reg16_Transmit_Bytes(I2C_TypeDef *dev, uint8_t address, uint16
          break;
       }
 
-      status = i2c_send_address(dev, address, I2C_WRITE_MODE, timeout);
+      status = i2c_send_address(dev, dev_address, I2C_WRITE_MODE, timeout);
       if (status < 0)
       {
          break;
@@ -514,12 +538,15 @@ int8_t I2C_Master_Reg16_Transmit_Bytes(I2C_TypeDef *dev, uint8_t address, uint16
          break;
       }
 
-      for (idx = 0; idx < len; idx++)
+      if (0U < len)
       {
-         status = i2c_send_data(dev, (data + idx), timeout);
-         if (status < 0)
+         for (idx = 0; idx < len - 1; idx++)
          {
-            break;
+            status = i2c_send_data(dev, (data + idx), timeout);
+            if (status < 0)
+            {
+               break;
+            }
          }
       }
 
@@ -533,7 +560,7 @@ int8_t I2C_Master_Reg16_Transmit_Bytes(I2C_TypeDef *dev, uint8_t address, uint16
    return status;
 }
 
-int8_t I2C_Master_Reg8_Recessive_Bytes(I2C_TypeDef *dev, uint8_t address, uint8_t reg,
+int8_t I2C_Master_Reg8_Recessive_Bytes(I2C_TypeDef *dev, uint8_t dev_address, uint8_t reg,
                                        uint8_t *data, uint8_t len, uint32_t timeout)
 {
    int8_t  status = 0;
@@ -541,8 +568,6 @@ int8_t I2C_Master_Reg8_Recessive_Bytes(I2C_TypeDef *dev, uint8_t address, uint8_
 
    do
    {
-      LL_I2C_AcknowledgeNextData(dev, LL_I2C_ACK);
-
       i2c_start_time_ms = TS_Get_ms();
 
       status = i2c_start(dev, timeout);
@@ -551,7 +576,7 @@ int8_t I2C_Master_Reg8_Recessive_Bytes(I2C_TypeDef *dev, uint8_t address, uint8_
          break;
       }
 
-      status = i2c_send_address(dev, address, I2C_WRITE_MODE, timeout);
+      status = i2c_send_address(dev, dev_address, I2C_WRITE_MODE, timeout);
       if (status < 0)
       {
          break;
@@ -575,13 +600,11 @@ int8_t I2C_Master_Reg8_Recessive_Bytes(I2C_TypeDef *dev, uint8_t address, uint8_
          break;
       }
 
-      status = i2c_send_address(dev, address, I2C_READ_MODE, timeout);
+      status = i2c_send_address(dev, dev_address, I2C_READ_MODE, timeout);
       if (status < 0)
       {
          break;
       }
-
-      // LL_I2C_AcknowledgeNextData(dev, LL_I2C_ACK);
 
       // data
       for (idx = 0; idx < len; idx++)
@@ -589,6 +612,13 @@ int8_t I2C_Master_Reg8_Recessive_Bytes(I2C_TypeDef *dev, uint8_t address, uint8_
          if (idx == len - 1)
          {
             LL_I2C_AcknowledgeNextData(dev, LL_I2C_NACK);
+#ifdef STM32F103xB
+            status = i2c_stop(dev, timeout);
+            if (status < 0)
+            {
+               break;
+            }
+#endif
          }
          else
          {
@@ -601,18 +631,19 @@ int8_t I2C_Master_Reg8_Recessive_Bytes(I2C_TypeDef *dev, uint8_t address, uint8_
             break;
          }
       }
-
+#ifdef STM32F401xC
       status = i2c_stop(dev, timeout);
       if (status < 0)
       {
          break;
       }
+#endif
    }
    while (0);
    return status;
 }
 
-int8_t I2C_Master_Reg16_Recessive_Bytes(I2C_TypeDef *dev, uint8_t address, uint16_t reg,
+int8_t I2C_Master_Reg16_Recessive_Bytes(I2C_TypeDef *dev, uint8_t dev_address, uint16_t reg,
                                         uint8_t *data, uint8_t len, uint32_t timeout)
 {
    int8_t  status = 0;
@@ -622,8 +653,6 @@ int8_t I2C_Master_Reg16_Recessive_Bytes(I2C_TypeDef *dev, uint8_t address, uint1
 
    do
    {
-      LL_I2C_AcknowledgeNextData(dev, LL_I2C_ACK);
-
       i2c_start_time_ms = TS_Get_ms();
 
       status = i2c_start(dev, timeout);
@@ -632,7 +661,7 @@ int8_t I2C_Master_Reg16_Recessive_Bytes(I2C_TypeDef *dev, uint8_t address, uint1
          break;
       }
 
-      status = i2c_send_address(dev, address, I2C_WRITE_MODE, timeout);
+      status = i2c_send_address(dev, dev_address, I2C_WRITE_MODE, timeout);
       if (status < 0)
       {
          break;
@@ -661,13 +690,11 @@ int8_t I2C_Master_Reg16_Recessive_Bytes(I2C_TypeDef *dev, uint8_t address, uint1
          break;
       }
 
-      status = i2c_send_address(dev, address, I2C_READ_MODE, timeout);
+      status = i2c_send_address(dev, dev_address, I2C_READ_MODE, timeout);
       if (status < 0)
       {
          break;
       }
-
-      // LL_I2C_AcknowledgeNextData(dev, LL_I2C_ACK);
 
       // data
       for (idx = 0; idx < len; idx++)
@@ -675,6 +702,13 @@ int8_t I2C_Master_Reg16_Recessive_Bytes(I2C_TypeDef *dev, uint8_t address, uint1
          if (idx == len - 1)
          {
             LL_I2C_AcknowledgeNextData(dev, LL_I2C_NACK);
+#ifdef STM32F103xB
+            status = i2c_stop(dev, timeout);
+            if (status < 0)
+            {
+               break;
+            }
+#endif
          }
          else
          {
@@ -687,12 +721,13 @@ int8_t I2C_Master_Reg16_Recessive_Bytes(I2C_TypeDef *dev, uint8_t address, uint1
             break;
          }
       }
-
+#ifdef STM32F401xC
       status = i2c_stop(dev, timeout);
       if (status < 0)
       {
          break;
       }
+#endif
    }
 
    while (0);

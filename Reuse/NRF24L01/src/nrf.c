@@ -212,8 +212,8 @@ void NRF24_TxMode(uint8_t *address, uint8_t channel)
 
 void NRF24_RxMode(uint8_t *address, uint8_t channel)
 {
-   UNUSED(address);
-   UNUSED(channel);
+   REUSE_UNUSED(address);
+   REUSE_UNUSED(channel);
 
    /* uint8_t reg = 0; */
    nrf24_disable();

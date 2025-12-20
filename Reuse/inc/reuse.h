@@ -2,7 +2,7 @@
  ********************************************************************************
  * @file    reuse.h
  * @author  Mikolaj Pieklo
- * @date    12.11.2025
+ * @date    23.11.2025
  * @brief
  ********************************************************************************
  */
@@ -21,7 +21,17 @@ extern "C" {
 /************************************
  * MACROS AND DEFINES
  ************************************/
-#define UNUSED(x) (void) (x)
+#define REUSE_UNUSED(x) (void) (x)
+
+#define REUSE_ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+
+#define REUSE_MIN(a, b) (((a) < (b)) ? (a) : (b))
+#define REUSE_MAX(a, b) (((a) > (b)) ? (a) : (b))
+
+#define REUSE_SHIFT_LEFT_MASK(val, shift, mask)  (((val) << (shift)) & (mask))
+#define REUSE_SHIFT_RIGHT_MASK(val, shift, mask) (((val) >> (shift)) & (mask))
+
+#define REUSE_MASK(val, mask) ((val) & (mask))
 
 /************************************
  * TYPEDEFS

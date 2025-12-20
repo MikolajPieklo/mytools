@@ -367,7 +367,7 @@ uint8_t SI4432_Tx_Debug(void)
 
 uint8_t SI4432_isDataAvailable(uint8_t pipenum)
 {
-   UNUSED(pipenum);
+   REUSE_UNUSED(pipenum);
    return 0;
 }
 
@@ -419,8 +419,8 @@ void SI4432_Rx_Debug(void)
 
 void SI4432_TxMode(uint8_t *address, uint8_t channel)
 {
-   UNUSED(address);
-   UNUSED(channel);
+   REUSE_UNUSED(address);
+   REUSE_UNUSED(channel);
 }
 
 void SI4432_RxMode(void)

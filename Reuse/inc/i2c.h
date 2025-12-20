@@ -64,27 +64,28 @@ I2c_Drv_Status_T I2C_Init(I2C_TypeDef *dev);
 
 int8_t I2C_Master_Scan(I2C_TypeDef *dev, uint32_t timeout);
 
-int8_t I2C_Master_Write(I2C_TypeDef *dev, uint8_t address, uint8_t data, uint32_t timeout);
+int8_t I2C_Master_Write(I2C_TypeDef *dev, uint8_t dev_address, uint8_t *data, uint8_t size,
+                        uint32_t timeout);
 
-int8_t I2C_Master_Read(I2C_TypeDef *dev, uint8_t address, uint8_t *data, uint8_t len,
+int8_t I2C_Master_Read(I2C_TypeDef *dev, uint8_t dev_address, uint8_t *data, uint8_t len,
                        uint32_t timeout);
 
-int8_t I2C_Master_Reg8_Transmit_Byte(I2C_TypeDef *dev, uint8_t address, uint8_t reg, uint8_t data,
-                                     uint32_t timeout);
+int8_t I2C_Master_Reg8_Transmit_Byte(I2C_TypeDef *dev, uint8_t dev_address, uint8_t reg,
+                                     uint8_t data, uint32_t timeout);
 
-int8_t I2C_Master_Reg16_Transmit_Byte(I2C_TypeDef *dev, uint8_t address, uint16_t reg, uint8_t data,
-                                      uint32_t timeout);
+int8_t I2C_Master_Reg16_Transmit_Byte(I2C_TypeDef *dev, uint8_t dev_address, uint16_t reg,
+                                      uint8_t data, uint32_t timeout);
 
-int8_t I2C_Master_Reg8_Transmit_Bytes(I2C_TypeDef *dev, uint8_t address, uint8_t reg, uint8_t *data,
-                                      uint8_t len, uint32_t timeout);
+int8_t I2C_Master_Reg8_Transmit_Bytes(I2C_TypeDef *dev, uint8_t dev_address, uint8_t reg,
+                                      uint8_t *data, uint8_t len, uint32_t timeout);
 
-int8_t I2C_Master_Reg16_Transmit_Bytes(I2C_TypeDef *dev, uint8_t address, uint16_t reg,
+int8_t I2C_Master_Reg16_Transmit_Bytes(I2C_TypeDef *dev, uint8_t dev_address, uint16_t reg,
                                        uint8_t *data, uint8_t len, uint32_t timeout);
 
-int8_t I2C_Master_Reg8_Recessive_Bytes(I2C_TypeDef *dev, uint8_t address, uint8_t reg,
+int8_t I2C_Master_Reg8_Recessive_Bytes(I2C_TypeDef *dev, uint8_t dev_address, uint8_t reg,
                                        uint8_t *data, uint8_t len, uint32_t timeout);
 
-int8_t I2C_Master_Reg16_Recessive_Bytes(I2C_TypeDef *dev, uint8_t address, uint16_t reg,
+int8_t I2C_Master_Reg16_Recessive_Bytes(I2C_TypeDef *dev, uint8_t dev_address, uint16_t reg,
                                         uint8_t *data, uint8_t len, uint32_t timeout);
 
 #ifdef __cplusplus

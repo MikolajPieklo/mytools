@@ -68,7 +68,7 @@ static const uint8_t crc8_nrsc5_table[256] = {
 /************************************
  * GLOBAL FUNCTIONS
  ************************************/
-uint8_t crc8_nrsc5(const uint8_t *data, uint32_t len)
+uint8_t crc8_nrsc5(uint8_t const *data, uint32_t len)
 {
    uint8_t crc = 0xFF; /* init */
    for (uint32_t i = 0; i < len; ++i)
