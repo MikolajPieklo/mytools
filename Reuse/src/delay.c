@@ -17,6 +17,7 @@
 #ifdef STM32F103xB
 #include <stm32f1xx_ll_bus.h>
 #include <stm32f1xx_ll_tim.h>
+#include <stm32f1xx_ll_utils.h>
 #elif STM32F401xC
 #include <stm32f4xx_ll_bus.h>
 #include <stm32f4xx_ll_tim.h>
@@ -75,11 +76,15 @@ void TIM4_IRQHandler(void)
  ************************************/
 void TS_Delay_ms(uint32_t delay_ms)
 {
+#if 0
    uint32_t tickstart = SysTickValue;
    while ((SysTickValue - tickstart) < delay_ms)
    {
       __NOP();
    }
+#endif
+
+   LL_mDelay(delay_ms);
 }
 
 void TS_Delay_us_Init(void)
