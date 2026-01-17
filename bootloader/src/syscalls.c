@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <circual_buffer.h>
 #include <errno.h>
 #include <signal.h>
 #include <sys/stat.h>
@@ -32,8 +33,9 @@
 #include <time.h>
 
 /* Variables */
-extern int __io_putchar(int ch) __attribute__((weak));
-extern int __io_getchar(void) __attribute__((weak));
+extern int                __io_putchar(int ch) __attribute__((weak));
+extern int                __io_getchar(void) __attribute__((weak));
+extern volatile CirBuff_T cb_uart1_tx;
 
 
 char  *__env[1] = {0};
@@ -84,6 +86,7 @@ __attribute__((weak)) int _write(int file, char *ptr, int len)
    (void) (file);
 
    //__io_putchar(*ptr++);
+   CirBuff_Insert_Text(&cb_uart1_tx, ptr, len);
    return len;
 }
 

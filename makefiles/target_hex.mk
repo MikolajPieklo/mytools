@@ -2,8 +2,9 @@
 .PHONY: HEX_APP HEX_SBL HEX_COMBINED
 
 HEX_APP:
-	python tools/support/elf_update.py "out/app.elf"
-	$(call generate_files_auto,out/app.elf)
+	$(call generate_binary_without_header, out/app.elf)
+	python tools/support/elf_update.py "out/app_without_header.bin" "out/app.elf"
+	$(call generate_files_auto, out/app.elf)
 
 ifeq ($(USE_SBL), yes)
 HEX_SBL:
@@ -25,6 +26,10 @@ HEX_COMBINED:
 else
 HEX_COMBINED:
 endif
+
+define generate_binary_without_header
+	$(CC_OBJCOPY) -O binary --remove-section=.header_app_section $1 $(basename $1)_without_header.bin
+endef
 
 define generate_files_auto
 	@echo "$(ccblue)\nProcessing $1$(ccend)"

@@ -49,15 +49,22 @@ static const struct device device_dev = {
 /************************************
  * PRIVATE TYPEDEFS
  ************************************/
-typedef struct program_info_typedef
+typedef struct __attribute__((packed)) header_app_typedef
 {
-   uint32_t text_sec_crc32;
+   uint32_t magic;
+   uint8_t  version_of_header;
+   uint32_t crc32;
+   uint32_t app_size;
    uint32_t data;
-   uint32_t size;
-} program_info_t;
+} header_app_t;
 
-__attribute__((section(".program_info_section"))) volatile const program_info_t program_info =
-    {.text_sec_crc32 = 0xABCDEFAB, .data = 0x63, .size = 0xFFFFFFFF};
+__attribute__((section(".header_app_section"))) volatile const header_app_t header_app = {
+   .magic = 0xABCDEFAB,
+   .version_of_header = 0x01,
+   .crc32 = 0xCCCCCCCC,
+   .app_size = 0xCDCDCDCD,
+   .data = 0xEFEFEFEF,
+};
 
 /************************************
  * STATIC VARIABLES
@@ -122,20 +129,16 @@ void Device_Info(void)
 {
    LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_CRC);
 
-   extern uint32_t _etext;
-   extern uint32_t _stext;
-
-   LL_CRC_ResetCRCCalculationUnit(CRC);
+   extern uint32_t _sisr_vector;
+   extern uint32_t _sheader_app_section;
 
    uint32_t crc_idx = 0;
-   uint32_t text_size = (uint32_t) &_etext - (uint32_t) &_stext;
+   uint32_t all_size = ((uint32_t) &_sheader_app_section - (uint32_t) &_sisr_vector) / 4;
 
-   log_info(&device_dev, "\x1b[2J\x1b[H");
-   log_info(&device_dev, "\r\n");
-
-   for (crc_idx = 0; crc_idx < text_size / 4; crc_idx++)
+   LL_CRC_ResetCRCCalculationUnit(CRC);
+   for (crc_idx = 0; crc_idx < all_size; crc_idx++)
    {
-      LL_CRC_FeedData32(CRC, (uint32_t) *(&_stext + crc_idx));
+      LL_CRC_FeedData32(CRC, (uint32_t) *(&_sisr_vector + crc_idx));
    }
 
    log_info(&device_dev, "#############################\r\n");
@@ -143,9 +146,10 @@ void Device_Info(void)
             LL_GetUID_Word2());
    check_restart_issues();
    log_info(&device_dev, "Flash size: %ldKB\r\n", LL_GetFlashSize());
-   log_info(&device_dev, "Program size: 0x%lx\r\n", text_size);
-   log_info(&device_dev, "Flash usage: \r\n");
-   log_info(&device_dev, "Flash crc32: 0x%lx\r\n", program_info.text_sec_crc32);
+   log_info(&device_dev, "App size: 0x%lx\r\n", header_app.app_size);
+   log_info(&device_dev, "Flash usage: %ld% %%\r\n",
+            (header_app.app_size * 100) / ((LL_GetFlashSize() - SBL_SIZE_KB) * 1024));
+   log_info(&device_dev, "Flash crc32: 0x%lx\r\n", header_app.crc32);
    log_info(&device_dev, "Calculated crc32: 0x%lx\r\n", LL_CRC_ReadData32(CRC));
    log_info(&device_dev, "Build time: \r\n");
    log_info(&device_dev, "commit: \r\n");

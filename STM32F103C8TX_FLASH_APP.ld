@@ -45,7 +45,7 @@ _Min_Stack_Size = 0x400 ; /* required amount of stack */
 MEMORY
 {
   RAM    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 20K
-  FLASH    (rx)    : ORIGIN = 0x8000000 + (SBL_SIZE_KB * 1024),   LENGTH = 64K - (SBL_SIZE_KB * 1024)
+  FLASH   (rx)    : ORIGIN = 0x8000000 + (SBL_SIZE_KB * 1024),   LENGTH = 64K - (SBL_SIZE_KB * 1024)
 }
 
 /* Sections */
@@ -55,6 +55,7 @@ SECTIONS
   .isr_vector :
   {
     . = ALIGN(4);
+    _sisr_vector = .;
     KEEP(*(.isr_vector)) /* Startup code */
     . = ALIGN(4);
   } >FLASH
@@ -75,16 +76,6 @@ SECTIONS
 
     . = ALIGN(4);
     _etext = .;        /* define a global symbols at end of code */
-  } >FLASH
-
-  .program_info_section :
-  {
-    . = ALIGN(4);
-    _sprogram_info_section = .;
-    *(.info_section)
-    *(.info_section*)
-    . = ALIGN(4);
-    _eprogram_info_section = .;
   } >FLASH
 
   /* Constant data into "FLASH" Rom type memory */
@@ -156,6 +147,16 @@ SECTIONS
     _edata = .;        /* define a global symbol at data end */
 
   } >RAM AT> FLASH
+
+  .header_app_section :
+  {
+    . = ALIGN(4);
+    _sheader_app_section = .;
+    *(.header_app)
+    *(.header_app*)
+    . = ALIGN(4);
+    _eheader_app_section = .;
+  } >FLASH
 
   /* Uninitialized data section into "RAM" Ram type memory */
   . = ALIGN(4);
