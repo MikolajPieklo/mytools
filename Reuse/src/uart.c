@@ -72,7 +72,7 @@ int8_t UART1_Init(void)
    /* Peripheral clock enable */
    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_USART1);
 #ifdef STM32F103xB
-   LL_AHB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_GPIOA);
+   LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_GPIOA);
 #elif STM32F401xC
    LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOA);
 #endif
@@ -130,7 +130,7 @@ int8_t USART2_Init(void)
    /* Peripheral clock enable */
    LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_USART2);
 #ifdef STM32F103xB
-   LL_AHB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_GPIOA);
+   LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_GPIOA);
 #elif STM32F401xC
    LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOA);
 #endif
