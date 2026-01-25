@@ -71,7 +71,11 @@ int8_t UART1_Init(void)
 
    /* Peripheral clock enable */
    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_USART1);
-   LL_AHB1_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_GPIOA);
+#ifdef STM32F103xB
+   LL_AHB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_GPIOA);
+#elif STM32F401xC
+   LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOA);
+#endif
 
    /*USART1 GPIO Configuration */
    GPIO_InitStruct.Pin = USART1_TX_PIN;
@@ -79,7 +83,19 @@ int8_t UART1_Init(void)
    GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_HIGH;
    GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
    GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
-   // GPIO_InitStruct.Alternate = LL_GPIO_AF_7;
+#ifdef STM32F401xC
+   GPIO_InitStruct.Alternate = LL_GPIO_AF_7;
+#endif
+   LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+   GPIO_InitStruct.Pin = USART1_RX_PIN;
+   GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
+   GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_HIGH;
+   GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+   GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
+#ifdef STM32F401xC
+   GPIO_InitStruct.Alternate = LL_GPIO_AF_7;
+#endif
    LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
    /* USART1 interrupt Init */
@@ -113,7 +129,11 @@ int8_t USART2_Init(void)
 
    /* Peripheral clock enable */
    LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_USART2);
-   LL_AHB1_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_GPIOA);
+#ifdef STM32F103xB
+   LL_AHB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_GPIOA);
+#elif STM32F401xC
+   LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOA);
+#endif
 
    GPIO_InitStruct.Pin = USART2_TX_RX_PIN;
    GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
@@ -149,12 +169,23 @@ int8_t USARTx_Set_BaudRate(USART_TypeDef *USARTx, uint32_t baudRate)
    {
       clock = all_clk.PCLK1_Frequency;
    }
-   else if (USARTx == USART2 || USARTx == USART3)
+   else if (USARTx == USART2
+            || USARTx ==
+#ifdef STM32F103xB
+                USART3)
+#elif STM32F401xC
+                USART6)
+#endif
    {
       clock = all_clk.PCLK2_Frequency;
    }
 
+#ifdef STM32F103xB
    LL_USART_SetBaudRate(USARTx, clock, baudRate);
+#elif STM32F401xC
+   LL_USART_SetBaudRate(USARTx, clock, LL_USART_OVERSAMPLING_16, baudRate);
+#endif
+
    return 0;
 }
 
@@ -187,9 +218,8 @@ int8_t USARTx_Rx(USART_TypeDef *USARTx, uint8_t *data, uint8_t lenght)
 
 void USART1_IRQHandler(void)
 {
-   if (LL_USART_IsActiveFlag_RXNE(USART1))
+   if (LL_USART_IsEnabledIT_RXNE(USART1) && LL_USART_IsActiveFlag_RXNE(USART1))
    {
-
       if (cb_uart1_rx.head == cb_uart1_rx.size)
       {
          cb_uart1_rx.head = 0;
@@ -198,12 +228,14 @@ void USART1_IRQHandler(void)
       cb_uart1_rx.head++;
    }
 
-   if (LL_USART_IsActiveFlag_TXE(USART1))
+   if (LL_USART_IsEnabledIT_TXE(USART1) && LL_USART_IsActiveFlag_TXE(USART1))
    {
+      /* TXE flag will be automatically cleared when writing new data in DR register */
    }
 
-   if (LL_USART_IsActiveFlag_TC(USART1))
+   if (LL_USART_IsEnabledIT_TC(USART1) && LL_USART_IsActiveFlag_TC(USART1))
    {
+      LL_USART_ClearFlag_TC(USART1);
       if (cb_uart1_tx.tail != cb_uart1_tx.head)
       {
          LL_USART_TransmitData8(USART1, cb_uart1_tx.data[cb_uart1_tx.tail]);
@@ -219,5 +251,9 @@ void USART1_IRQHandler(void)
       {
          LL_USART_DisableIT_TC(USART1);
       }
+   }
+   if (LL_USART_IsEnabledIT_ERROR(USART1) && LL_USART_IsActiveFlag_NE(USART1))
+   {
+      /* Call Error function */
    }
 }

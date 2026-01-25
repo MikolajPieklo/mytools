@@ -30,6 +30,10 @@ CFLAGS := \
 	-Wunused \
 	-Wundef
 
+CFLAGS_SBL = $(CFLAGS) -DSBL_BUILD=1
+CFLAGS_SBL := $(subst -DUSED_RTOS=1, ,$(CFLAGS_SBL))
+CFLAGS += -DAPP_BUILD=1
+
 LDFLAGS := \
 	-mcpu=$(MACH) \
 	-mthumb \
@@ -67,6 +71,11 @@ ifdef (USE_DOUBLE_PRECISION)
 	endif
 endif
 
-ifeq ($(USE_FREERTOS), yes)
-	CFLAGS += -DUSE_RTOS
+SILENTMODE_FLAG :=
+ifeq ($(SILENTMODE), yes)
+SILENTMODE_FLAG := @
+endif
+
+ifeq ($(USE_RTOS), yes)
+	CFLAGS += -DUSED_RTOS=1
 endif

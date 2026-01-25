@@ -27,14 +27,13 @@ endif
 
 LIST_SRC_SBL := $(foreach dir,$(PATH_SBL_DIR),$(shell find $(dir) -type f -name "*.c"))
 
-ifdef USE_FREERTOS
-	ifeq ($(USE_FREERTOS), yes)
-		PATH_RTOS_DIR := tools/freertos
-		SRC_RTOS_DIR_PORT := tools/freertos/portable/GCC/ARM_CM4F
-		SRC_RTOS_DIR_HEAP := tools/freertos/portable/MemMang
-		SRC_RTOS := $(foreach dir, $(PATH_RTOS_DIR), $(wildcard $(dir)/*.c))
-	endif
+ifeq ($(USE_RTOS), yes)
+	PATH_RTOS_DIR := tools/freertos
+	SRC_RTOS_DIR_PORT := tools/freertos/portable/GCC/ARM_CM4F
+	SRC_RTOS_DIR_HEAP := tools/freertos/portable/MemMang
+	SRC_RTOS := $(foreach dir, $(PATH_RTOS_DIR), $(wildcard $(dir)/*.c))
 endif
+
 
 OBJ_CORE := $(patsubst Core/%.c, $(OBJ_DIR)/%.o, $(SRC_CORE))
 OBJ_DRIVERS := $(LIST_SRC_DRIVERS:$(SRC_DRIVERS_DIR)/%.c=$(DRIVER_DIR)/%.o)
@@ -42,23 +41,21 @@ OBJ_REUSE := $(patsubst $(PATH_REUSE_BASE)/%.c,$(REUSE_DIR)/%.o,$(LIST_SRC_REUSE
 OBJ_SBL_REUSE := $(patsubst $(PATH_REUSE_BASE)/%.c,$(SBL_DIR)/%.o,$(LIST_SRC_SBL_REUSE))
 OBJ_SBL := $(patsubst $(PATH_SBL_BASE)/%.c,$(SBL_DIR)/%.o,$(LIST_SRC_SBL))
 
-ifdef USE_FREERTOS
-	ifeq ($(USE_FREERTOS), yes)
-		OBJ_RTOS := $(patsubst tools/freertos/%.c, $(RTOS_DIR)/%.o, $(SRC_RTOS))
-		OBJ_RTOS += out/RTOS/port.o
-		ifeq ($(FREERTOS_HEAP), heap_1)
-			OBJ_RTOS += out/RTOS/heap_1.o
-		else ifeq ($(FREERTOS_HEAP), heap_2)
-			OBJ_RTOS += out/RTOS/heap_2.o
-		else ifeq ($(FREERTOS_HEAP), heap_3)
-			OBJ_RTOS += out/RTOS/heap_3.o
-		else ifeq ($(FREERTOS_HEAP), heap_4)
-			OBJ_RTOS += out/RTOS/heap_4.o
-		else ifeq ($(FREERTOS_HEAP), heap_5)
-			OBJ_RTOS += out/RTOS/heap_5.o
-		else
-			$(error FREERTOS_HEAP is not define!)
-		endif
+ifeq ($(USE_RTOS), yes)
+	OBJ_RTOS := $(patsubst tools/freertos/%.c, $(RTOS_DIR)/%.o, $(SRC_RTOS))
+	OBJ_RTOS += out/RTOS/port.o
+	ifeq ($(FREERTOS_HEAP), heap_1)
+		OBJ_RTOS += out/RTOS/heap_1.o
+	else ifeq ($(FREERTOS_HEAP), heap_2)
+		OBJ_RTOS += out/RTOS/heap_2.o
+	else ifeq ($(FREERTOS_HEAP), heap_3)
+		OBJ_RTOS += out/RTOS/heap_3.o
+	else ifeq ($(FREERTOS_HEAP), heap_4)
+		OBJ_RTOS += out/RTOS/heap_4.o
+	else ifeq ($(FREERTOS_HEAP), heap_5)
+		OBJ_RTOS += out/RTOS/heap_5.o
+	else
+		$(error FREERTOS_HEAP is not define!)
 	endif
 endif
 
@@ -79,15 +76,14 @@ $(REUSE_DIR)/%.o: $(PATH_REUSE_BASE)/%.c
 $(SBL_DIR)/%.o: $(PATH_REUSE_BASE)/%.c
 	@echo "SBL::: Compiling $< -> $@"
 	@mkdir -p $(dir $@)
-	$(SILENTMODE_FLAG) $(CC) $(CFLAGS) $(CONST) $(DEBUGINFO) $(INC) $< -o $@
+	$(SILENTMODE_FLAG) $(CC) $(CFLAGS_SBL) $(CONST) $(DEBUGINFO) $(INC) $< -o $@
 
 $(SBL_DIR)/%.o: $(PATH_SBL_BASE)/%.c
 	@echo "SBL::: Compiling $< -> $@"
 	@mkdir -p $(dir $@)
-	$(SILENTMODE_FLAG) $(CC) $(CFLAGS) $(CONST) $(DEBUGINFO) $(INC) $< -o $@
+	$(SILENTMODE_FLAG) $(CC) $(CFLAGS_SBL) $(CONST) $(DEBUGINFO) $(INC) $< -o $@
 
-ifdef USE_FREERTOS
-ifeq ($(USE_FREERTOS), yes)
+ifeq ($(USE_RTOS), yes)
 $(RTOS_DIR)/%.o: $(PATH_RTOS_DIR)/%.c
 	@echo "Compiling $< -> $@"
 	$(SILENTMODE_FLAG) $(CC) $(CFLAGS) $(CONST) $(DEBUGINFO) $(INC) $< -o $@
@@ -99,7 +95,6 @@ $(RTOS_DIR)/%.o: $(SRC_RTOS_DIR_PORT)/%.c
 $(RTOS_DIR)/%.o: $(SRC_RTOS_DIR_HEAP)/%.c
 	@echo "Compiling $< -> $@"
 	$(SILENTMODE_FLAG) $(CC) $(CFLAGS) $(CONST) $(DEBUGINFO) $(INC) $< -o $@
-endif
 endif
 
 # $^ dependency $@ target

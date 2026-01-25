@@ -21,6 +21,7 @@
 #elif STM32F401xC
 #include <stm32f4xx_ll_bus.h>
 #include <stm32f4xx_ll_tim.h>
+#include <stm32f4xx_ll_utils.h>
 #else
 #error Module not supported!
 #endif

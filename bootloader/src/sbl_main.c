@@ -13,13 +13,6 @@
 #include <stdint.h>
 
 #ifdef STM32F103xB
-#include "stm32f1xx.h"
-#elif STM32F401xC
-#include "stm32f4xx.h"
-#else
-#error Module not supported!
-#endif
-
 #include <stm32f1xx_ll_bus.h>
 #include <stm32f1xx_ll_cortex.h>
 #include <stm32f1xx_ll_dma.h>
@@ -29,6 +22,23 @@
 #include <stm32f1xx_ll_rcc.h>
 #include <stm32f1xx_ll_system.h>
 #include <stm32f1xx_ll_utils.h>
+
+#include "stm32f1xx.h"
+#elif STM32F401xC
+#include <stm32f4xx_ll_bus.h>
+#include <stm32f4xx_ll_cortex.h>
+#include <stm32f4xx_ll_dma.h>
+#include <stm32f4xx_ll_exti.h>
+#include <stm32f4xx_ll_gpio.h>
+#include <stm32f4xx_ll_pwr.h>
+#include <stm32f4xx_ll_rcc.h>
+#include <stm32f4xx_ll_system.h>
+#include <stm32f4xx_ll_utils.h>
+
+#include "stm32f4xx.h"
+#else
+#error Module not supported!
+#endif
 
 #include "WS25Qxx.h"
 #include "uart.h"
@@ -89,7 +99,9 @@ void boot_main(void)
    pFunction appEntry;
    uint32_t  appStack;
 
+#ifdef STM32F103xB
    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_AFIO);
+#endif
    LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
 
    /* System interrupt init*/
@@ -98,8 +110,10 @@ void boot_main(void)
    /* SysTick_IRQn interrupt configuration */
    NVIC_SetPriority(SysTick_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 15, 0));
 
+#ifdef STM32F103xB
    /* NOJTAG: JTAG-DP Disabled and SW-DP Enabled */
    LL_GPIO_AF_Remap_SWJ_NOJTAG();
+#endif
 
    /* Configure the system clock */
    SystemClock_Config();
@@ -110,11 +124,18 @@ void boot_main(void)
 
    LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
 
-   /* GPIO Ports Clock Enable */
+/* GPIO Ports Clock Enable */
+#ifdef STM32F103xB
    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_GPIOC);
    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_GPIOD);
    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_GPIOA);
    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_GPIOB);
+#elif STM32F401xC
+   LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOC);
+   LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOD);
+   LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOA);
+   LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOB);
+#endif
 
    /**/
    LL_GPIO_ResetOutputPin(LED_Port, LED_Pin);
@@ -184,6 +205,7 @@ void assert_failed(uint8_t *file, uint32_t line)
 
 void SystemClock_Config(void)
 {
+#ifdef STM32F103xB
    LL_FLASH_SetLatency(LL_FLASH_LATENCY_2);
    while (LL_FLASH_GetLatency() != LL_FLASH_LATENCY_2)
    {
@@ -215,4 +237,40 @@ void SystemClock_Config(void)
 
    SystemCoreClockUpdate();
    // LL_SetSystemCoreClock(72000000);
+#elif STM32F401xC
+   LL_FLASH_SetLatency(LL_FLASH_LATENCY_2);
+   while (LL_FLASH_GetLatency() != LL_FLASH_LATENCY_2)
+   {
+   }
+   LL_PWR_SetRegulVoltageScaling(LL_PWR_REGU_VOLTAGE_SCALE2);
+   LL_RCC_HSE_Enable();
+
+   /* Wait till HSE is ready */
+   while (LL_RCC_HSE_IsReady() != 1)
+   {
+   }
+   LL_RCC_HSE_EnableCSS();
+   LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_HSE, LL_RCC_PLLM_DIV_25, 168, LL_RCC_PLLP_DIV_2);
+   LL_RCC_PLL_Enable();
+
+   /* Wait till PLL is ready */
+   while (LL_RCC_PLL_IsReady() != 1)
+   {
+   }
+   while (LL_PWR_IsActiveFlag_VOS() == 0)
+   {
+   }
+   LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
+   LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_2);
+   LL_RCC_SetAPB2Prescaler(LL_RCC_APB2_DIV_1);
+   LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
+
+   /* Wait till System clock is ready */
+   while (LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL)
+   {
+   }
+   LL_Init1msTick(84000000);
+   LL_SetSystemCoreClock(84000000);
+   LL_RCC_SetTIMPrescaler(LL_RCC_TIM_PRESCALER_TWICE);
+#endif
 }

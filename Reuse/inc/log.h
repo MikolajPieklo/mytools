@@ -55,6 +55,9 @@ void log_dbg(const struct device *dev, const char *fmt, ...);
 /************************************
  * GLOBAL FUNCTION PROTOTYPES
  ************************************/
+#ifdef USED_RTOS
+void Log_Init(void);
+#endif
 
 
 #ifdef __cplusplus

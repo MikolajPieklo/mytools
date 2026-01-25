@@ -10,11 +10,11 @@ check_flags:
 		USE_SBL ?= no; \
 	fi
 
-	@if [ -n "$(USE_FREERTOS)" ]; then \
-		echo "USE_FREERTOS is defined: $(USE_FREERTOS)"; \
+	@if [ -n "$(USE_RTOS)" ]; then \
+		echo "USE_RTOS is defined: $(USE_RTOS)"; \
 	else \
-		echo "USE_FREERTOS is not defined"; \
-		USE_FREERTOS ?= no; \
+		echo "USE_RTOS is not defined"; \
+		USE_RTOS ?= no; \
 	fi
 
 	@if [ -e $(OUT_DIR) ]; then \

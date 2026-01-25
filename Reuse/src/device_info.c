@@ -141,6 +141,9 @@ void Device_Info(void)
       LL_CRC_FeedData32(CRC, (uint32_t) *(&_sisr_vector + crc_idx));
    }
 
+#ifdef USED_RTOS
+   Log_Init();
+#endif
    log_info(&device_dev, "#############################\r\n");
    log_info(&device_dev, "Device ID: 0x%lx 0x%lx 0x%lx\r\n", LL_GetUID_Word0(), LL_GetUID_Word1(),
             LL_GetUID_Word2());

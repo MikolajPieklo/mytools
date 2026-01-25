@@ -1,8 +1,8 @@
 # Author: M Pieklo
-# Date: 12.11.2025
+# Date: 25.01.2026
 # Project: STM32F103C8T6_HELLO_WORLD.
 # License: Opensource
-# Version: 1.0.2
+# Version: 1.0.4
 
 include tools/makefiles/makefile_colors.mk
 include tools/makefiles/makefile_info.mk
@@ -12,7 +12,7 @@ include tools/makefiles/makefile_common.mk
 
 SILENTMODE := yes
 USE_SBL := yes
-USE_FREERTOS := no
+USE_RTOS := no
 FREERTOS_HEAP := heap_1
 
 NAME := $(OUT_DIR)/APP
@@ -51,11 +51,12 @@ SRC_SBL := tools/SBL/src
 
 ########################################################################################################################
 
-.PHONY: all release sbl app
+.PHONY: all release sbl app doc
 
 all: check_flags DIR make_app make_sbl HEX_APP HEX_SBL HEX_COMBINED
 sbl: check_flags DIR make_sbl HEX_SBL
 app: check_flags DIR make_app HEX_APP
+doc: make_doc
 release : all
 
 include tools/makefiles/makefile_dependencies.mk
@@ -64,7 +65,7 @@ include tools/makefiles/target_check_flags.mk
 include tools/makefiles/target_chip.mk
 include tools/makefiles/target_clean.mk
 include tools/makefiles/target_dir.mk
-include tools/makefiles/target_doc.mk
+include tools/makefiles/make_doc.mk
 include tools/makefiles/make_app.mk
 include tools/makefiles/make_sbl.mk
 include tools/makefiles/target_hex.mk
