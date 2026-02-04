@@ -21,7 +21,8 @@ extern "C" {
 /************************************
  * MACROS AND DEFINES
  ************************************/
-#define WINDBOND_64M_ID 0xEF4017
+#define WINDBOND_64M_ID  0xEF4017
+#define WINDBOND_128M_ID 0xEF4018
 
 #define WS25QXX_INST_Write_Enable            0x06
 #define WS25QXX_INST_Manufacturer            0x90

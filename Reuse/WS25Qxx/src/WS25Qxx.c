@@ -184,14 +184,19 @@ void WS25Qxx_Init(void)
    ws25qxx_reset();
 
    dev_id = ws25qxx_check_id();
+   log_info(&ws25qxx_dev, "Flash id: 0x%06X\r\n", dev_id);
 
    if (WINDBOND_64M_ID == dev_id)
    {
       log_info(&ws25qxx_dev, "Flash: WINDBOND 64M\r\n");
    }
+   else if (WINDBOND_128M_ID == dev_id)
+   {
+      log_info(&ws25qxx_dev, "Flash: WINDBOND 128M\r\n");
+   }
    else
    {
-      log_info(&ws25qxx_dev, "Flash: Error initialization\r\n");
+      log_info(&ws25qxx_dev, "Flash: Unknown device\r\n");
    }
 
    ws25qxx_write_status_register2(0x00);
