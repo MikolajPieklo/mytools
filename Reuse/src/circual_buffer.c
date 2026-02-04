@@ -71,7 +71,7 @@ void CirBuff_Insert_Text(CirBuff_T *cb, uint8_t *text, uint32_t len)
    }
    else if (cb->head + len > (CIRCUAL_BUFFER_SIZE - 1))
    {
-      uint32_t lenToEndBuff = CIRCUAL_BUFFER_SIZE - cb->head;
+      uint32_t lenToEndBuff = CIRCUAL_BUFFER_SIZE - 1 - cb->head;
       memcpy(cb->data + cb->head, text, lenToEndBuff);
       memcpy(cb->data, (text + lenToEndBuff), (len - lenToEndBuff));
       cb->head = (len - lenToEndBuff);

@@ -59,7 +59,6 @@ void log_dbg(const struct device *dev, const char *fmt, ...);
 void Log_Init(void);
 #endif
 
-
 #ifdef __cplusplus
 }
 #endif

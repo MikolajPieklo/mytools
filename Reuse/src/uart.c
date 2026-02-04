@@ -220,7 +220,7 @@ void USART1_IRQHandler(void)
 {
    if (LL_USART_IsEnabledIT_RXNE(USART1) && LL_USART_IsActiveFlag_RXNE(USART1))
    {
-      if (cb_uart1_rx.head == cb_uart1_rx.size)
+      if (cb_uart1_rx.head == CIRCUAL_BUFFER_SIZE)
       {
          cb_uart1_rx.head = 0;
       }

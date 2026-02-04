@@ -37,11 +37,10 @@ extern "C" {
  ************************************/
 typedef struct CirBuff_Typedef
 {
-   uint32_t       tail;
-   uint32_t       head;
-   uint8_t        data[CIRCUAL_BUFFER_SIZE];
-   uint32_t       size;
-   USART_TypeDef *USARTx;
+   volatile uint32_t tail;
+   volatile uint32_t head;
+   uint8_t           data[CIRCUAL_BUFFER_SIZE];
+   USART_TypeDef    *USARTx;
 } CirBuff_T;
 
 /************************************

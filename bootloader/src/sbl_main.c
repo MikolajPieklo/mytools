@@ -44,6 +44,7 @@
 #include "uart.h"
 #include <circual_buffer.h>
 #include <log.h>
+#include <spi.h>
 
 /************************************
  * EXTERN VARIABLES
@@ -71,12 +72,8 @@ static const struct device sbl_dev = {
    .name = "BOOT",
 };
 
-volatile CirBuff_T cb_uart1_tx = {.tail = 0,
-                                  .head = 0,
-                                  .size = CIRCUAL_BUFFER_SIZE,
-                                  .USARTx = USART1};
-
-volatile CirBuff_T cb_uart1_rx = {.tail = 0, .head = 0, .size = 64, .USARTx = USART1};
+volatile CirBuff_T cb_uart1_tx = {.tail = 0, .head = 0, .USARTx = USART1};
+volatile CirBuff_T cb_uart1_rx = {.tail = 0, .head = 0, .USARTx = USART1};
 
 /************************************
  * GLOBAL VARIABLES
@@ -154,6 +151,7 @@ void boot_main(void)
 
    log_info(&sbl_dev, "Bootloader\r\n");
 
+   SPI1_Init();
    WS25Qxx_Init();
 
    while (cb_uart1_tx.head != cb_uart1_tx.tail)

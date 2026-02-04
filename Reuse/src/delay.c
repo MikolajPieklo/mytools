@@ -26,6 +26,11 @@
 #error Module not supported!
 #endif
 
+#ifdef USED_RTOS
+#include "FreeRTOS.h"
+#include "task.h"
+#endif
+
 /************************************
  * EXTERN VARIABLES
  ************************************/
@@ -153,5 +158,9 @@ void TS_Delay_us(uint32_t delay_us)
 
 uint32_t TS_Get_ms(void)
 {
+#ifdef USED_RTOS
+   return pdTICKS_TO_MS(xTaskGetTickCount());
+#else
    return SysTickValue;
+#endif
 }
