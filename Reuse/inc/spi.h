@@ -50,6 +50,7 @@ void   SPI1_Init(void);
 void   SPI2_Init(void);
 int8_t SPI_Transfer(SPI_TypeDef *dev, uint32_t cs_pin, uint8_t *tx_data, uint8_t *rx_data,
                     uint8_t n);
+int8_t SPI_TransferByte(SPI_TypeDef *dev, uint32_t cs_pin, uint8_t tx_data, uint8_t *rx_data);
 
 #ifdef __cplusplus
 }

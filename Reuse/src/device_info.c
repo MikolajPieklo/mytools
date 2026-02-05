@@ -144,6 +144,10 @@ void Device_Info(void)
 #ifdef USED_RTOS
    Log_Init();
 #endif
+#ifndef USED_SBL
+   /* Clear terminal */
+   log_info(&device_dev, "\x1b[2J\x1b[H");
+#endif
    log_info(&device_dev, "#############################\r\n");
    log_info(&device_dev, "Device ID: 0x%lx 0x%lx 0x%lx\r\n", LL_GetUID_Word0(), LL_GetUID_Word1(),
             LL_GetUID_Word2());

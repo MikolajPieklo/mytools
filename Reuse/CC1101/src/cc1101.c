@@ -43,10 +43,6 @@ static const struct device cc1101_dev = {
 #define CRYSTAL_FREQUENCY   26000
 #define CRYSTAL_FREQUENCY_M CRYSTAL_FREQUENCY / 1000
 
-static void    cc1101_spi_cs_low(void);
-static void    cc1101_spi_cs_high(void);
-static uint8_t spi_write(uint8_t *txdata, uint8_t *rxdata, size_t n);
-static void    spi_read(uint8_t reg, uint8_t *rxdata);
 static uint8_t cc1101_write_reg(uint8_t reg, uint8_t value);
 static uint8_t cc1101_write_burst_reg(uint8_t reg, uint8_t *data, uint8_t size);
 static uint8_t cc1101_strobe(uint8_t command);
@@ -148,10 +144,12 @@ void CC1101_Init(uint8_t addr)
    cc1101_strobe(CC1101_C_SRX);
    CC1101_Check_State();
    while (CC1101_STATE_STARTCAL == cc1101_read_reg(CC1101_R_MARCSTATE))
-      ;
+   {
+   }
    CC1101_Check_State();
    while (CC1101_STATE_RX != cc1101_read_reg(CC1101_R_MARCSTATE))
-      ;
+   {
+   }
 }
 
 void CC1101_Reset(void)
@@ -195,10 +193,9 @@ CC1101_Marc_State_T CC1101_Check_State(void)
    static CC1101_Marc_State_T status = CC1101_STATE_UNKNOW;
    static uint8_t             counter = 0;
    uint8_t                    data[2];
+   uint8_t                    tx[2] = {CC1101_READ_BURST | CC1101_R_MARCSTATE, 0xFF};
 
-   cc1101_spi_cs_low();
-   spi_read(CC1101_READ_BURST | CC1101_R_MARCSTATE, data);
-   cc1101_spi_cs_high();
+   SPI_Transfer(SPI1, LL_GPIO_PIN_4, tx, data, 2);
    counter++;
 
    if ((status != data[1]) || (counter % 20 == 0))
@@ -305,23 +302,28 @@ uint8_t CC1101_Tx_Debug(void)
 
       cc1101_strobe(CC1101_C_SIDLE);
       while (CC1101_STATE_IDLE != cc1101_read_reg(CC1101_R_MARCSTATE))
-         ;
+      {
+      }
 
       cc1101_write_burst_reg(CC1101_R_TX_FIFO, txdata, len + 1); // Write TX data
 
       cc1101_strobe(CC1101_C_STX); // Change state to TX, initiating
       CC1101_Check_State();
       while (CC1101_STATE_STARTCAL == cc1101_read_reg(CC1101_R_MARCSTATE))
-         ;
+      {
+      }
       CC1101_Check_State();
       while (CC1101_STATE_TX == cc1101_read_reg(CC1101_R_MARCSTATE))
-         ;
+      {
+      }
       CC1101_Check_State();
       while (CC1101_STATE_TX_END == cc1101_read_reg(CC1101_R_MARCSTATE))
-         ;
+      {
+      }
       CC1101_Check_State();
       while (CC1101_STATE_IDLE != cc1101_read_reg(CC1101_R_MARCSTATE))
-         ;
+      {
+      }
    }
 
    counter++;
@@ -360,51 +362,14 @@ uint8_t CC1101_Rx_Debug(void)
       cc1101_strobe(CC1101_C_SRX);
       CC1101_Check_State();
       while (CC1101_STATE_STARTCAL == cc1101_read_reg(CC1101_R_MARCSTATE))
-         ;
+      {
+      }
       CC1101_Check_State();
       while (CC1101_STATE_RX != cc1101_read_reg(CC1101_R_MARCSTATE))
-         ;
+      {
+      }
    }
    return 0;
-}
-
-static void cc1101_spi_cs_low(void)
-{
-   LL_GPIO_ResetOutputPin(GPIOA, LL_GPIO_PIN_4);
-}
-
-static void cc1101_spi_cs_high(void)
-{
-   LL_GPIO_SetOutputPin(GPIOA, LL_GPIO_PIN_4);
-}
-
-static uint8_t spi_write(uint8_t *txdata, uint8_t *rxdata, size_t n)
-{
-   memset(rxdata, 0, n);
-   size_t i = 0;
-   while (i < n)
-   {
-      LL_SPI_TransmitData8(SPI1, txdata[i]);
-      while (LL_SPI_IsActiveFlag_BSY(SPI1))
-         ;
-      rxdata[i] = LL_SPI_ReceiveData8(SPI1);
-      i++;
-   }
-
-   return 0;
-}
-
-static void spi_read(uint8_t reg, uint8_t *rxdata)
-{
-   LL_SPI_TransmitData8(SPI1, reg);
-   while (LL_SPI_IsActiveFlag_BSY(SPI1))
-      ;
-   rxdata[0] = LL_SPI_ReceiveData8(SPI1);
-
-   LL_SPI_TransmitData8(SPI1, 0xFF);
-   while (LL_SPI_IsActiveFlag_BSY(SPI1))
-      ;
-   rxdata[1] = LL_SPI_ReceiveData8(SPI1);
 }
 
 static uint8_t cc1101_write_reg(uint8_t reg, uint8_t value)
@@ -412,21 +377,18 @@ static uint8_t cc1101_write_reg(uint8_t reg, uint8_t value)
    uint8_t rxdata[2] = {0, 0};
    uint8_t txdata[2] = {CC1101_WRITE_SINGLE_BYTE | reg, value};
 
-   cc1101_spi_cs_low();
-   spi_write(txdata, rxdata, 2);
-   cc1101_spi_cs_high();
+   SPI_Transfer(SPI1, LL_GPIO_PIN_4, txdata, rxdata, 2);
+
    return rxdata[1];
 }
 
 static uint8_t cc1101_write_burst_reg(uint8_t reg, uint8_t *data, uint8_t size)
 {
    uint8_t rxdata[20];
-   uint8_t reg2 = reg | CC1101_WRITE_BURST;
+   uint8_t tx = reg | CC1101_WRITE_BURST;
 
-   cc1101_spi_cs_low();
-   spi_write(&reg2, rxdata, 1);
-   spi_write(data, rxdata, size);
-   cc1101_spi_cs_high();
+   SPI_Transfer(SPI1, LL_GPIO_PIN_4, &tx, rxdata, 1);
+   SPI_Transfer(SPI1, LL_GPIO_PIN_4, data, rxdata, size);
    return rxdata[size - 1];
 }
 
@@ -435,18 +397,15 @@ static uint8_t cc1101_strobe(uint8_t command)
    uint8_t rxdata = 0;
    uint8_t txdata = CC1101_WRITE_SINGLE_BYTE | command;
 
-   cc1101_spi_cs_low();
-   spi_write(&txdata, &rxdata, 1);
-   cc1101_spi_cs_high();
+   SPI_Transfer(SPI1, LL_GPIO_PIN_4, &txdata, &rxdata, 1);
    return rxdata;
 }
 
 static uint8_t cc1101_read_reg(uint8_t reg)
 {
-   cc1101_spi_cs_low();
    uint8_t rxdata[2] = {0, 0};
-   spi_read(CC1101_READ_BURST | reg, rxdata);
-   cc1101_spi_cs_high();
+   uint8_t txdata[2] = {CC1101_READ_BURST | reg, 0xFFu};
+   SPI_Transfer(SPI1, LL_GPIO_PIN_4, txdata, rxdata, 2);
    return rxdata[1];
 }
 
@@ -456,10 +415,8 @@ static uint8_t cc1101_read_burst_reg(uint8_t reg, uint8_t *data, uint8_t size)
    uint8_t tx_data[size];
    memset(tx_data, 0, size);
 
-   cc1101_spi_cs_low();
-   spi_write(&reg2, data, 1);
-   spi_write(tx_data, data, size);
-   cc1101_spi_cs_high();
+   SPI_Transfer(SPI1, LL_GPIO_PIN_4, &reg2, data, 1);
+   SPI_Transfer(SPI1, LL_GPIO_PIN_4, tx_data, data, size);
    return data[0];
 }
 

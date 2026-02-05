@@ -90,7 +90,11 @@ void TS_Delay_ms(uint32_t delay_ms)
    }
 #endif
 
+#ifdef USED_RTOS
+   vTaskDelay(delay_ms);
+#else
    LL_mDelay(delay_ms);
+#endif
 }
 
 void TS_Delay_us_Init(void)

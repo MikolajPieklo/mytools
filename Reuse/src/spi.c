@@ -248,3 +248,8 @@ spi_exit:
 
    return retVal;
 }
+
+int8_t SPI_TransferByte(SPI_TypeDef *dev, uint32_t cs_pin, uint8_t tx_data, uint8_t *rx_data)
+{
+   return SPI_Transfer(dev, cs_pin, &tx_data, rx_data, 1);
+}

@@ -52,7 +52,7 @@ typedef struct CirBuff_Typedef
  ************************************/
 void CirBuff_Insert_Char(CirBuff_T *cb, uint8_t c);
 
-void CirBuff_Insert_Text(CirBuff_T *cb, uint8_t *text, uint32_t len);
+void CirBuff_Insert_Text(CirBuff_T *cb, const uint8_t *text, uint32_t len);
 
 #ifdef __cplusplus
 }

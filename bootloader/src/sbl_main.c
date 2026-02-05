@@ -72,8 +72,8 @@ static const struct device sbl_dev = {
    .name = "BOOT",
 };
 
-volatile CirBuff_T cb_uart1_tx = {.tail = 0, .head = 0, .USARTx = USART1};
-volatile CirBuff_T cb_uart1_rx = {.tail = 0, .head = 0, .USARTx = USART1};
+CirBuff_T cb_uart1_tx = {.tail = 0, .head = 0, .USARTx = USART1};
+CirBuff_T cb_uart1_rx = {.tail = 0, .head = 0, .USARTx = USART1};
 
 /************************************
  * GLOBAL VARIABLES

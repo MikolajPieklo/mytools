@@ -30,8 +30,8 @@
 /************************************
  * EXTERN VARIABLES
  ************************************/
-extern volatile CirBuff_T cb_uart1_tx;
-extern volatile CirBuff_T cb_uart1_rx;
+extern CirBuff_T cb_uart1_tx;
+extern CirBuff_T cb_uart1_rx;
 
 /************************************
  * PRIVATE MACROS AND DEFINES

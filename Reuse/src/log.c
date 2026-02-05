@@ -33,12 +33,12 @@ extern CirBuff_T cb_uart1_tx;
 static SemaphoreHandle_t log_mutex = NULL;
 #endif
 
-#ifndef USED_RTOS || defined(SBL_BUILD)
+#if !defined(USED_RTOS) || defined(SBL_BUILD)
 #define define_log_printk_level(func_name, kern_level_str)                                \
    void func_name(const struct device *dev, const char *fmt, ...)                         \
    {                                                                                      \
       char        buff[256];                                                              \
-      char        timestamp[20] = {0};                                                    \
+      uint8_t     timestamp[20] = {0};                                                    \
       va_list     va;                                                                     \
       const char *color = "";                                                             \
       const char *level_name = kern_level_str;                                            \
@@ -69,7 +69,7 @@ static SemaphoreHandle_t log_mutex = NULL;
                                                                                           \
       printf("%s[%s] %s    %s: %s\033[0m", color, level_name, timestamp, dev_name, buff); \
                                                                                           \
-      if (len >= sizeof(buff))                                                            \
+      if ((uint32_t) len >= sizeof(buff))                                                 \
       {                                                                                   \
          printf("\033[35m[WARNING] Log message truncated!\033[0m");                       \
       }                                                                                   \
@@ -84,7 +84,7 @@ static SemaphoreHandle_t log_mutex = NULL;
       if (xSemaphoreTake(log_mutex, portMAX_DELAY) == pdTRUE)                              \
       {                                                                                    \
          static char buff[256]; /* Static, to avoid stack overflow */                      \
-         char        timestamp[20] = {0};                                                  \
+         uint8_t     timestamp[20] = {0};                                                  \
          va_list     va;                                                                   \
          const char *color = "";                                                           \
          const char *level_name = kern_level_str;                                          \
@@ -115,10 +115,10 @@ static SemaphoreHandle_t log_mutex = NULL;
                                                                                            \
          char final[256];                                                                  \
          int  final_len = snprintf(final, sizeof(final), "%s[%s] %s %s: %s\033[0m", color, \
-                                   kern_level_str, timestamp, dev_name, buff);             \
-         CirBuff_Insert_Text(&cb_uart1_tx, final, final_len);                              \
+                                   level_name, timestamp, dev_name, buff);                 \
+         CirBuff_Insert_Text(&cb_uart1_tx, (uint8_t *) final, final_len);                  \
                                                                                            \
-         if (len >= sizeof(buff))                                                          \
+         if ((uint32_t) len >= sizeof(buff))                                               \
          {                                                                                 \
             printf("\033[35m[WARNING] Log message truncated!\033[0m");                     \
          }                                                                                 \
