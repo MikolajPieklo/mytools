@@ -29,9 +29,10 @@ LIST_SRC_SBL := $(foreach dir,$(PATH_SBL_DIR),$(shell find $(dir) -type f -name 
 
 ifeq ($(USE_RTOS), yes)
 	PATH_RTOS_DIR := tools/freertos
-	SRC_RTOS_DIR_PORT := tools/freertos/portable/GCC/ARM_CM4F
-	SRC_RTOS_DIR_HEAP := tools/freertos/portable/MemMang
+	SRC_RTOS_DIR_PORT := $(PATH_RTOS_DIR)/portable/GCC/ARM_CM4F
+	SRC_RTOS_DIR_HEAP := $(PATH_RTOS_DIR)/portable/MemMang
 	SRC_RTOS := $(foreach dir, $(PATH_RTOS_DIR), $(wildcard $(dir)/*.c))
+	SRC_RTOS_MODULES_DIR := tools/RTOS_MODULES/src
 endif
 
 
@@ -57,6 +58,7 @@ ifeq ($(USE_RTOS), yes)
 	else
 		$(error FREERTOS_HEAP is not define!)
 	endif
+	OBJ_RTOS_MODULES := $(patsubst $(SRC_RTOS_MODULES_DIR)/%.c, $(RTOS_MODULES_DIR)/%.o, $(wildcard $(SRC_RTOS_MODULES_DIR)/*.c))
 endif
 
 $(OBJ_DIR)/%.o: Core/%.c
@@ -95,6 +97,10 @@ $(RTOS_DIR)/%.o: $(SRC_RTOS_DIR_PORT)/%.c
 $(RTOS_DIR)/%.o: $(SRC_RTOS_DIR_HEAP)/%.c
 	@echo "Compiling $< -> $@"
 	$(SILENTMODE_FLAG) $(CC) $(CFLAGS) $(CONST) $(DEBUGINFO) $(INC) $< -o $@
+
+$(RTOS_MODULES_DIR)/%.o: $(SRC_RTOS_MODULES_DIR)/%.c
+	@echo "Compiling $< -> $@"
+	$(SILENTMODE_FLAG) $(CC) $(CFLAGS) $(CONST) $(DEBUGINFO) $(INC) $< -o $@
 endif
 
 # $^ dependency $@ target
@@ -111,4 +117,5 @@ $(SBL_DIR)/$(NAME_SBL_STARTUP_FILE).o: $(PATH_SBL_MACH_DIR)/$(NAME_SBL_STARTUP_F
 -include $(OBJ_REUSE:.o=.d)
 -include $(OBJ_SBL_REUSE:.o=.d)
 -include $(OBJ_RTOS:.o=.d)
+-include $(OBJ_RTOS_MODULES:.o=.d)
 -include $(OBJ_SBL:.o=.d)

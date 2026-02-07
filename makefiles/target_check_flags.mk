@@ -1,7 +1,4 @@
-
-.PHONY: check_flags
-
-check_flags:
+.check_flags:
 
 	@if [ -n "$(USE_SBL)" ]; then \
 		echo "USE_SBL is defined: $(USE_SBL)"; \
