@@ -46,6 +46,8 @@ static const struct device device_dev = {
    .name = "Device",
 };
 
+#define HEADER_APP_MAGIC_STRING 0xABCDEFABu
+
 /************************************
  * PRIVATE TYPEDEFS
  ************************************/
@@ -59,7 +61,7 @@ typedef struct __attribute__((packed)) header_app_typedef
 } header_app_t;
 
 __attribute__((section(".header_app_section"))) volatile const header_app_t header_app = {
-   .magic = 0xABCDEFAB,
+   .magic = HEADER_APP_MAGIC_STRING,
    .version_of_header = 0x01,
    .crc32 = 0xCCCCCCCC,
    .app_size = 0xCDCDCDCD,
@@ -148,6 +150,11 @@ void Device_Info(void)
    /* Clear terminal */
    log_info(&device_dev, "\x1b[2J\x1b[H");
 #endif
+
+   if (header_app.magic != HEADER_APP_MAGIC_STRING)
+   {
+      log_err(&device_dev, "Invalid header magic\r\n");
+   }
    log_info(&device_dev, "#############################\r\n");
    log_info(&device_dev, "Device ID: 0x%lx 0x%lx 0x%lx\r\n", LL_GetUID_Word0(), LL_GetUID_Word1(),
             LL_GetUID_Word2());

@@ -57,6 +57,9 @@ SECTIONS
     . = ALIGN(4);
     _sisr_vector = .;
     KEEP(*(.isr_vector)) /* Startup code */
+    /* FIX CRC PROBLEM */
+    /* 0x200 bytes for vector table*/
+    . = _sisr_vector + 0x200;
     . = ALIGN(4);
   } >FLASH
 
