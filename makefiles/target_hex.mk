@@ -1,20 +1,20 @@
 
 .PHONY: HEX_APP HEX_SBL HEX_COMBINED
 
-HEX_APP:
+HEX_APP: make_app
 	$(call generate_binary_without_header, out/app.elf)
 	python tools/support/elf_update.py "out/app_without_header.bin" "out/app.elf"
 	$(call generate_files_auto, out/app.elf)
 
 ifeq ($(USE_SBL), yes)
-HEX_SBL:
+HEX_SBL: make_sbl
 	$(call generate_files_auto,out/SBL/sbl.elf)
 else
 HEX_SBL:
 endif
 
 ifeq ($(USE_SBL),yes)
-HEX_COMBINED:
+HEX_COMBINED: HEX_APP HEX_SBL
 	@echo "$(ccpurple)Combining SBL and APP into one HEX...$(ccend)"
 	@if [ -f out/SBL/sbl.hex ] && [ -f out/app.hex ]; then \
 		srec_cat out/SBL/sbl.hex -Intel \
