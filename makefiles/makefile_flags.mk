@@ -79,3 +79,7 @@ endif
 ifeq ($(USE_RTOS), yes)
 	CFLAGS += -DUSED_RTOS=1
 endif
+
+ifeq ($(USE_SBL), yes)
+	CFLAGS += -DUSED_SBL=1
+endif
