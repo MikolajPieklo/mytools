@@ -1,14 +1,14 @@
 /**
  ********************************************************************************
- * @file    task_monitor.h
+ * @file    task_cc1101.h
  * @author  Mikolaj Pieklo
- * @date    28.01.2026
+ * @date    08.02.2026
  * @brief
  ********************************************************************************
  */
 
-#ifndef __TASK_MONITOR_H__
-#define __TASK_MONITOR_H__
+#ifndef __TASK_CC1101_H__
+#define __TASK_CC1101_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,7 +17,7 @@ extern "C" {
 /************************************
  * INCLUDES
  ************************************/
-#include <stdint.h>
+
 /************************************
  * MACROS AND DEFINES
  ************************************/
@@ -33,7 +33,7 @@ extern "C" {
 /************************************
  * GLOBAL FUNCTION PROTOTYPES
  ************************************/
-int32_t Task_Monitor_Create(void *parameters);
+void Task_CC1101_Create(void *parameters);
 
 #ifdef __cplusplus
 }

@@ -24,6 +24,11 @@
 #error Module not supported!
 #endif
 
+#ifdef USED_RTOS
+#include <FreeRTOS.h>
+#include <semphr.h>
+#endif
+
 /************************************
  * EXTERN VARIABLES
  ************************************/
@@ -50,6 +55,10 @@ static const struct device spi_dev = {
 /************************************
  * STATIC VARIABLES
  ************************************/
+#ifdef USED_RTOS
+static xSemaphoreHandle spi1_mutex;
+static xSemaphoreHandle spi2_mutex;
+#endif
 
 /************************************
  * GLOBAL VARIABLES
@@ -74,6 +83,13 @@ void SPI1_Init(void)
    LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOA);
 #endif
 
+#ifdef USED_RTOS
+   spi1_mutex = xSemaphoreCreateMutex();
+   if (spi1_mutex == NULL)
+   {
+      log_err(&spi_dev, "Failed to create SPI1 mutex\r\n");
+   }
+#endif
    LL_GPIO_SetPinMode(GPIOA, SPI1_CS1_Pin, LL_GPIO_MODE_OUTPUT);
    LL_GPIO_SetPinSpeed(GPIOA, SPI1_CS1_Pin, LL_GPIO_SPEED_FREQ_HIGH);
    LL_GPIO_SetPinOutputType(GPIOA, SPI1_CS1_Pin, LL_GPIO_OUTPUT_PUSHPULL);
@@ -168,9 +184,32 @@ void SPI2_Init(void)
 int8_t SPI_Transfer(SPI_TypeDef *dev, uint32_t cs_pin, uint8_t *tx_data, uint8_t *rx_data,
                     uint8_t n)
 {
+#ifdef USED_RTOS
+   xSemaphoreHandle mutex = NULL;
+   if (dev == SPI1)
+   {
+      mutex = spi1_mutex;
+   }
+   else if (dev == SPI2)
+   {
+      mutex = spi2_mutex;
+   }
+   else
+   {
+      log_err(&spi_dev, "Invalid SPI device\r\n");
+      return -EINVAL;
+   }
+#endif
    int8_t   retVal = 0;
    uint32_t t0;
 
+#ifdef USED_RTOS
+   if (xSemaphoreTake(mutex, pdMS_TO_TICKS(portMAX_DELAY)) != pdTRUE)
+   {
+      log_err(&spi_dev, "Failed to acquire SPI mutex\r\n");
+      return -ETIMEDOUT;
+   }
+#endif
    if (cs_pin)
    {
       LL_GPIO_ResetOutputPin(GPIOA, cs_pin);
@@ -245,6 +284,13 @@ spi_exit:
    {
       LL_GPIO_SetOutputPin(GPIOA, cs_pin);
    }
+#ifdef USED_RTOS
+   if (xSemaphoreGive(mutex) != pdTRUE)
+   {
+      log_err(&spi_dev, "Failed to release SPI mutex\r\n");
+      return -ETIMEDOUT;
+   }
+#endif
 
    return retVal;
 }

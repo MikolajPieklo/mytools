@@ -71,7 +71,7 @@ static void monitorTask(void *parameters)
 
    for (;;)
    {
-      vTaskDelay(40000); /* delay 40s */
+      vTaskDelay(pdMS_TO_TICKS(40000)); /* delay 40s */
 
       uxArraySize = uxTaskGetNumberOfTasks();
       if (uxArraySize == MAX_TASKS)
@@ -104,6 +104,9 @@ static void monitorTask(void *parameters)
 
             prevTaskTime[index].prevTaskTime = pxTaskStatusArray[x].ulRunTimeCounter;
          }
+         log_notice(&monitor_task, "Free heap: %lu\r\n", xPortGetFreeHeapSize());
+         /*log_notice(&monitor_task, "Min free heap: %lu\n", xPortGetMinimumEverFreeHeapSize());*/
+         /*log_notice(&monitor_task, "%s", vPortGetHeapStats(xNumberOfFreeBlocks));*/
          prevTotalTime = total_run_time;
          vPortFree(pxTaskStatusArray);
       }
@@ -131,8 +134,11 @@ static uint8_t find_index(uint32_t task_id, TaskPrevTime_t *table)
 /************************************
  * GLOBAL FUNCTIONS
  ************************************/
-int32_t StartTaskMonitor(void)
+int32_t Task_Monitor_Create(void *parameters)
 {
+   /* Unused parameters. */
+   (void) parameters;
+   ConfigureTimerForRunTimeStats();
    return xTaskCreate(monitorTask, "monitor", configMINIMAL_STACK_SIZE, (void *) NULL,
                       tskIDLE_PRIORITY, NULL);
 }

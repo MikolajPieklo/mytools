@@ -41,10 +41,23 @@
 static const struct device i2c_dev = {
    .name = "I2C",
 };
-#define I2C2_SCL_PIN        LL_GPIO_PIN_10
-#define I2C2_SDA_PIN        LL_GPIO_PIN_11
-#define I2C2_SPEEDCLOCK     100000U
-#define I2C2_DUTYCYCLE      LL_I2C_DUTYCYCLE_2
+#ifdef STM32F103xB
+#define I2C2_SCL_PIN    LL_GPIO_PIN_10
+#define I2C2_SDA_PIN    LL_GPIO_PIN_11
+#define I2C2_SPEEDCLOCK 100000U
+#define I2C2_DUTYCYCLE  LL_I2C_DUTYCYCLE_2
+#elif STM32F401xC
+#define I2C1_SCL_PIN    LL_GPIO_PIN_8
+#define I2C1_SDA_PIN    LL_GPIO_PIN_9
+#define I2C1_SPEEDCLOCK 100000U
+#define I2C1_DUTYCYCLE  LL_I2C_DUTYCYCLE_2
+
+#define I2C2_SCL_PIN    LL_GPIO_PIN_10
+#define I2C2_SDA_PIN    LL_GPIO_PIN_11
+#define I2C2_SPEEDCLOCK 100000U
+#define I2C2_DUTYCYCLE  LL_I2C_DUTYCYCLE_2
+#endif
+
 #define I2C_SCAN_TIMEOUT_MS 2U
 
 /************************************
@@ -181,25 +194,51 @@ I2c_Drv_Status_T I2C_Init(I2C_TypeDef *dev)
 #ifdef STM32F103xB
          LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_GPIOB);
 #elif STM32F401xC
-         LL_APB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOB);
+         LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOB);
 #endif
          LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C2);
 
          LL_GPIO_SetPinMode(GPIOB, I2C2_SCL_PIN, LL_GPIO_MODE_ALTERNATE);
          LL_GPIO_SetPinSpeed(GPIOB, I2C2_SCL_PIN, LL_GPIO_SPEED_FREQ_HIGH);
          LL_GPIO_SetPinOutputType(GPIOB, I2C2_SCL_PIN, LL_GPIO_OUTPUT_OPENDRAIN);
-         LL_GPIO_SetPinPull(GPIOB, I2C2_SCL_PIN, LL_GPIO_PULL_UP);
+         LL_GPIO_SetPinPull(GPIOB, I2C2_SCL_PIN, LL_GPIO_PULL_NO);
 
          LL_GPIO_SetPinMode(GPIOB, I2C2_SDA_PIN, LL_GPIO_MODE_ALTERNATE);
          LL_GPIO_SetPinSpeed(GPIOB, I2C2_SDA_PIN, LL_GPIO_SPEED_FREQ_HIGH);
          LL_GPIO_SetPinOutputType(GPIOB, I2C2_SDA_PIN, LL_GPIO_OUTPUT_OPENDRAIN);
-         LL_GPIO_SetPinPull(GPIOB, I2C2_SDA_PIN, LL_GPIO_PULL_UP);
+         LL_GPIO_SetPinPull(GPIOB, I2C2_SDA_PIN, LL_GPIO_PULL_NO);
       }
+      else if (I2C1 == dev)
+      {
+#ifdef STM32F103xB
+         LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_GPIOB);
+#elif STM32F401xC
+         LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOB);
+#endif
+         LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C1);
+
+         LL_GPIO_SetPinMode(GPIOB, I2C1_SCL_PIN, LL_GPIO_MODE_ALTERNATE);
+         LL_GPIO_SetPinSpeed(GPIOB, I2C1_SCL_PIN, LL_GPIO_SPEED_FREQ_HIGH);
+         LL_GPIO_SetPinOutputType(GPIOB, I2C1_SCL_PIN, LL_GPIO_OUTPUT_OPENDRAIN);
+         LL_GPIO_SetPinPull(GPIOB, I2C1_SCL_PIN, LL_GPIO_PULL_UP);
+#ifdef STM32F401xC
+         LL_GPIO_SetAFPin_8_15(GPIOB, I2C1_SCL_PIN, LL_GPIO_AF_4);
+#endif
+
+         LL_GPIO_SetPinMode(GPIOB, I2C1_SDA_PIN, LL_GPIO_MODE_ALTERNATE);
+         LL_GPIO_SetPinSpeed(GPIOB, I2C1_SDA_PIN, LL_GPIO_SPEED_FREQ_HIGH);
+         LL_GPIO_SetPinOutputType(GPIOB, I2C1_SDA_PIN, LL_GPIO_OUTPUT_OPENDRAIN);
+         LL_GPIO_SetPinPull(GPIOB, I2C1_SDA_PIN, LL_GPIO_PULL_UP);
+#ifdef STM32F401xC
+         LL_GPIO_SetAFPin_8_15(GPIOB, I2C1_SDA_PIN, LL_GPIO_AF_4);
+#endif
+      }
+
 
       LL_I2C_Disable(dev);
       LL_RCC_GetSystemClocksFreq(&rcc_clocks);
       LL_I2C_ConfigSpeed(dev, rcc_clocks.PCLK1_Frequency, I2C2_SPEEDCLOCK, I2C2_DUTYCYCLE);
-      LL_I2C_SetClockSpeedMode(dev, LL_I2C_CLOCK_SPEED_STANDARD_MODE);
+      // LL_I2C_SetClockSpeedMode(dev, LL_I2C_CLOCK_SPEED_STANDARD_MODE);
       LL_I2C_SetMode(dev, LL_I2C_MODE_I2C);
       LL_I2C_Enable(dev);
    }

@@ -13,6 +13,7 @@
 #include <stdio.h>
 
 #include <FreeRTOS.h>
+#include <delay.h>
 #include <task.h>
 
 #ifdef STM32F103xB
@@ -67,6 +68,10 @@ void vApplicationMallocFailedHook(void)
    taskDISABLE_INTERRUPTS();
 
    printf("Malloc Failed!\r\n");
+   while (1)
+   {
+   }
+   TS_Delay_ms(1000); /* delay 1000 ms */
    NVIC_SystemReset();
 
    for (;;)
@@ -100,7 +105,10 @@ void vApplicationStackOverflowHook(TaskHandle_t pxTask, char *pcTaskName)
 
    printf("STACK OVERFLOW! Task name = %s\r\n", pcTaskName);
    // snprintf(, sizeof(), "STACK OVERFLOW! Task name = %s\r\n", pcTaskName);
-
+   while (1)
+   {
+   }
+   TS_Delay_ms(1000); /* delay 1000 ms */
    NVIC_SystemReset();
 
    for (;;)
