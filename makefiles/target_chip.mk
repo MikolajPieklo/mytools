@@ -1,5 +1,5 @@
 
-.PHONY: load load_app load_sbl restart reset erase connect verify test dump
+.PHONY: load load_app load_sbl restart reset erase connect verify test dump remote ping
 
 OPENOCD_IFACE  := /usr/share/openocd/scripts/interface/stlink.cfg
 OPENOCD_TARGET := /usr/share/openocd/scripts/target/$(NAME_OPENOCD_CFG).cfg
@@ -44,6 +44,10 @@ test:
 dump:
 	st-flash read $(IMAGE_DUMP) $(IMAGE_DUMP_ADDR) 65536
 #	$(OPENOCD) -c "init" -c "halt" -c "dump_image $(IMAGE_DUMP) $(IMAGE_DUMP_ADDR) 0x90E0" -c "reset" -c "exit"
+
+remote:
+
+ping:
 
 #serial number st-link
 #53FF6C064965525327141187 - purple

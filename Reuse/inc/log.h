@@ -59,6 +59,9 @@ void log_dbg(const struct device *dev, const char *fmt, ...);
 void Log_Init(void);
 #endif
 
+void Log_Ascii_Buffer(const struct device *dev, const uint8_t *buffer, uint8_t length);
+void Log_Hex_Buffer(const struct device *dev, const uint8_t *buffer, uint8_t length);
+
 #ifdef __cplusplus
 }
 #endif

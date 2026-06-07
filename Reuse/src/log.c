@@ -162,3 +162,58 @@ void Log_Init(void)
    log_mutex = xSemaphoreCreateMutex();
 }
 #endif
+
+
+void Log_Hex_Buffer(const struct device *dev, const uint8_t *buffer, uint8_t length)
+{
+   static const char hex[] = "0123456789ABCDEF";
+   static char       hex_storage[(64 * 3) + 1];
+   char             *hex_str = hex_storage;
+
+   if ((buffer == NULL) || (length == 0))
+   {
+      log_dbg(dev, "Buffer: %s\r\n", "<empty>");
+      return;
+   }
+
+   for (uint8_t i = 0; i < length; i++)
+   {
+      hex_str[i * 3] = hex[(buffer[i] >> 4) & 0x0F];
+      hex_str[(i * 3) + 1] = hex[buffer[i] & 0x0F];
+      hex_str[(i * 3) + 2] = (i + 1u < length) ? ' ' : '\0';
+   }
+
+   log_dbg(dev, "Buffer: %s\r\n", hex_str);
+}
+
+void Log_Ascii_Buffer(const struct device *dev, const uint8_t *buffer, uint8_t length)
+{
+   static char ascii_storage[64 + 1];
+
+   if ((buffer == NULL) || (length == 0))
+   {
+      log_dbg(dev, "Buffer: %s\r\n", "<empty>");
+      return;
+   }
+
+   uint8_t copy_len = length;
+   if (copy_len > 64u)
+   {
+      copy_len = 64u;
+   }
+
+   for (uint8_t i = 0; i < copy_len; i++)
+   {
+      if ((buffer[i] >= 32u) && (buffer[i] <= 126u))
+      {
+         ascii_storage[i] = (char) buffer[i];
+      }
+      else
+      {
+         ascii_storage[i] = '.';
+      }
+   }
+   ascii_storage[copy_len] = '\0';
+
+   log_dbg(dev, "Buffer: %s\r\n", ascii_storage);
+}
