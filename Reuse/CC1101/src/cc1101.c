@@ -55,7 +55,7 @@ static const struct device cc1101_dev = {
 #define CC1101_DBG_MDMCFG2_PROFILE   0x13
 #define CC1101_DBG_MDMCFG2_FALLBACK  0x12
 #define CC1101_DBG_MDMCFG2_FALLBACK2 0x11
-#define CC1101_DBG_MDMCFG1_PROFILE   0x22
+#define CC1101_DBG_MDMCFG1_PROFILE   0x72
 #define CC1101_DBG_ADDR_PROFILE      0xFF
 
 #define CRYSTAL_FREQUENCY   26000
@@ -510,13 +510,14 @@ void CC1101_Debug_Init(void)
 
    cc1101_cmd_strobe(CC1101_CMD_SIDLE);
 
-   // Match RPi dump: GDO2=0x29, GDO1=0x2E, GDO0=0x06
-   cc1101_write_reg(CC1101_R_IOCFG2, 0x29);
-   cc1101_write_reg(CC1101_R_IOCFG1, 0x2E);
-   cc1101_write_reg(CC1101_R_IOCFG0, 0x06);
+   cc1101_write_reg(CC1101_R_IOCFG2,
+                    0x40 | 0x07); // Asserts when a packet has been received with CRC OK. De-asserts
+                                  // when the first byte is read from the RX FIFO
+   cc1101_write_reg(CC1101_R_IOCFG1, 0x2E); // High impedance, output disabled
+   cc1101_write_reg(CC1101_R_IOCFG0, 0x29); // Chip ready signal on GDO0, active high, 30ns pulse
 
    // --- FIFO threshold ---
-   cc1101_write_reg(CC1101_R_FIFOTHR, 0x47);
+   cc1101_write_reg(CC1101_R_FIFOTHR, 0x00);
 
    // --- Sync word (match RPi) ---
    cc1101_write_reg(CC1101_R_SYNC1, 0xD3);
