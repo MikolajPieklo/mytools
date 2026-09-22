@@ -46,6 +46,7 @@ static const struct device si4432_dev = {
 
 volatile bool irq = false;
 
+#if 0
 void EXTI9_5_IRQHandler(void)
 {
    if (SET == LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_6))
@@ -54,6 +55,7 @@ void EXTI9_5_IRQHandler(void)
       irq = true;
    }
 }
+#endif
 
 static void si4432_spi_cs_low(void)
 {

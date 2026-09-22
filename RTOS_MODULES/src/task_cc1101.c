@@ -75,10 +75,11 @@ static void task_cc1101(void *parameters)
 
       /* Example Task Code */
       // CC1101_Check_State();
-      CC1101_Debug_Rx();
+      // CC1101_Debug_Rx();
+      CC1101_Debug_Tx();
 
       // LL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-      vTaskDelay(pdMS_TO_TICKS(1000)); /* delay 1000 ticks */
+      vTaskDelay(pdMS_TO_TICKS(2000)); /* delay 1000 ticks */
    }
 }
 

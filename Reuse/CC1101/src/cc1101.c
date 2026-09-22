@@ -20,8 +20,10 @@
 #include <stm32f1xx_ll_spi.h>
 #elif STM32F401xC
 #include <stm32f4xx_ll_bus.h>
+#include <stm32f4xx_ll_exti.h>
 #include <stm32f4xx_ll_gpio.h>
 #include <stm32f4xx_ll_spi.h>
+#include <stm32f4xx_ll_system.h>
 #else
 #error Module not supported!
 #endif
@@ -29,9 +31,9 @@
 #include "cc1101_reg.h"
 #include <delay.h>
 #include <log.h>
+#include <main.h>
 #include <spi.h>
 #include <string.h>
-
 /************************************
  * EXTERN VARIABLES
  ************************************/
@@ -88,6 +90,21 @@ static int8_t  cc1101_get_rssi(void);
 static uint8_t cc1101_get_lqi(void);
 static void    cc1101_log_hex_buffer(const uint8_t *buffer, uint8_t length);
 static void    cc1101_log_ascii_buffer(const uint8_t *buffer, uint8_t length);
+static void    cc1101_format_payload(const uint8_t *buffer, uint8_t length, char *ascii_payload,
+                                     char *hex_payload);
+
+/************************************
+ * IRQ FUNCTIONS
+ ************************************/
+void EXTI9_5_IRQHandler(void)
+{
+   if (SET == LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_6))
+   {
+      // log_info(&cc1101_dev, "TEST\r\n");
+      LL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+      LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_6);
+   }
+}
 
 /************************************
  * STATIC FUNCTIONS
@@ -249,6 +266,22 @@ static uint8_t cc1101_get_lqi(void)
    uint8_t rxData = 0;
    cc1101_read_burst_reg(CC1101_R_LQI, &rxData, 1);
    return rxData;
+}
+
+static void cc1101_format_payload(const uint8_t *buffer, uint8_t length, char *ascii_payload,
+                                  char *hex_payload)
+{
+   static const char hex_chars[] = "0123456789ABCDEF";
+
+   hex_payload[0] = '\0';
+   for (uint8_t i = 0; i < length; i++)
+   {
+      ascii_payload[i] = ((buffer[i] >= 32u) && (buffer[i] <= 126u)) ? (char) buffer[i] : '.';
+      hex_payload[i * 3] = hex_chars[(buffer[i] >> 4) & 0x0F];
+      hex_payload[(i * 3) + 1] = hex_chars[buffer[i] & 0x0F];
+      hex_payload[(i * 3) + 2] = (i + 1u < length) ? ' ' : '\0';
+   }
+   ascii_payload[length] = '\0';
 }
 
 /************************************
@@ -504,6 +537,15 @@ void CC1101_Debug_Init(void)
 
    LL_GPIO_SetPinMode(GPIOB, CC1101_GDO0_Pin, LL_GPIO_MODE_INPUT);
    LL_GPIO_SetPinMode(GPIOB, CC1101_GDO2_Pin, LL_GPIO_MODE_INPUT);
+   LL_GPIO_SetPinPull(GPIOB, CC1101_GDO2_Pin, LL_GPIO_PULL_NO);
+   LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SYSCFG);
+   LL_SYSCFG_SetEXTISource(LL_SYSCFG_EXTI_PORTB, LL_SYSCFG_EXTI_LINE6);
+
+   LL_EXTI_EnableIT_0_31(LL_EXTI_LINE_6);
+   LL_EXTI_EnableFallingTrig_0_31(LL_EXTI_LINE_6);
+
+   NVIC_EnableIRQ(EXTI9_5_IRQn);
+   NVIC_SetPriority(EXTI9_5_IRQn, 0);
 
    uint8_t rxdata = 0;
    CC1101_Reset();
@@ -615,56 +657,12 @@ void CC1101_Debug_Init(void)
 
 uint8_t CC1101_Debug_Tx(void)
 {
-   // uint8_t payload[] = "HelloWorld";
-   // uint8_t payload_len = strlen((char *) payload);
+   static const uint8_t payload[] = "Hello";
+   const uint8_t        payload_len = (uint8_t) (sizeof(payload) - 1U);
+   uint8_t              tx_frame[1U + sizeof(payload)];
 
-   // uint8_t txdata[3 + payload_len];
-
-   // txdata[0] = payload_len + 2;   // długość BEZ bajtu length
-   // txdata[1] = CC1101_BR_ADDRESS; // dest
-   // txdata[2] = CC1101_TX_ADDRESS; // src
-
-   // memcpy(&txdata[3], payload, payload_len);
-
-   // cc1101_write_burst_reg(CC1101_R_TX_FIFO, txdata, payload_len + 3);
-
-   // CC1101_Check_State();
-
-   // log_dbg(&cc1101_dev, "Changing state to IDLE\r\n");
-   // cc1101_cmd_strobe(CC1101_CMD_SIDLE);
-   // while (CC1101_STATE_IDLE != cc1101_read_reg(CC1101_R_MARCSTATE))
-   // {
-   // }
-
-   // cc1101_write_burst_reg(CC1101_R_TX_FIFO, txdata, payload_len + 3); // Write TX data
-
-   // log_dbg(&cc1101_dev, "Changing state to TX\r\n");
-   // cc1101_cmd_strobe(CC1101_CMD_STX);
-   // CC1101_Check_State();
-   // while (CC1101_STATE_STARTCAL == cc1101_read_reg(CC1101_R_MARCSTATE))
-   // {
-   // }
-   // CC1101_Check_State();
-   // while (CC1101_STATE_TX == cc1101_read_reg(CC1101_R_MARCSTATE))
-   // {
-   // }
-   // // CC1101_Check_State();
-   // // while (CC1101_STATE_TX_END == cc1101_read_reg(CC1101_R_MARCSTATE))
-   // // {
-   // // }
-   // CC1101_Check_State();
-   // while (CC1101_STATE_IDLE != cc1101_read_reg(CC1101_R_MARCSTATE))
-   // {
-   // }
-   // cc1101_cmd_strobe(CC1101_CMD_STX);
-
-   // while (cc1101_read_reg(CC1101_R_MARCSTATE) == CC1101_STATE_TX)
-   // {
-   // }
-
-   // return 1;
-
-   uint8_t data[10] = "HelloWorld";
+   tx_frame[0] = payload_len;
+   memcpy(&tx_frame[1], payload, payload_len);
 
    log_dbg(&cc1101_dev, "---- TX START ----\r\n");
 
@@ -683,8 +681,8 @@ uint8_t CC1101_Debug_Tx(void)
    uint8_t txbytes = cc1101_read_reg(CC1101_R_TXBYTES) & 0x7F;
    log_dbg(&cc1101_dev, "TXBYTES after flush: %d\r\n", txbytes);
 
-   // 3️⃣ Załaduj dane
-   cc1101_write_burst_reg(CC1101_R_TX_FIFO, data, sizeof(data));
+   // 3️⃣ Załaduj dane: [length][payload...]
+   cc1101_write_burst_reg(CC1101_R_TX_FIFO, tx_frame, (uint8_t) (payload_len + 1U));
 
    txbytes = cc1101_read_reg(CC1101_R_TXBYTES) & 0x7F;
    log_dbg(&cc1101_dev, "TXBYTES after write: %d\r\n", txbytes);
@@ -717,6 +715,8 @@ uint8_t CC1101_Debug_Tx(void)
    log_dbg(&cc1101_dev, "Final state: 0x%02X\r\n", state);
 
    log_dbg(&cc1101_dev, "---- TX END ----\r\n");
+
+   return 1U;
 }
 
 uint8_t CC1101_Debug_Rx(void)
@@ -824,21 +824,6 @@ uint8_t CC1101_Debug_Rx(void)
    TS_Delay_ms(2);
    pktctrl1_cfg = cc1101_read_reg(CC1101_R_PKTCTRL1);
    status_bytes = (pktctrl1_cfg & (1u << 2)) ? 2u : 0u;
-
-   // Utrzymuj zgodnosc z profilem RPi.
-   uint8_t mdmcfg1_cfg = cc1101_read_reg(CC1101_R_MDMCFG1);
-   uint8_t mdmcfg2_cfg = cc1101_read_reg(CC1101_R_MDMCFG2);
-   if ((mdmcfg1_cfg != CC1101_DBG_MDMCFG1_PROFILE) || (mdmcfg2_cfg != runtime_mdmcfg2))
-   {
-      cc1101_cmd_strobe(CC1101_CMD_SIDLE);
-      cc1101_write_reg(CC1101_R_MDMCFG1, CC1101_DBG_MDMCFG1_PROFILE);
-      cc1101_write_reg(CC1101_R_MDMCFG2, runtime_mdmcfg2);
-      cc1101_cmd_strobe(CC1101_CMD_SRX);
-      log_dbg(&cc1101_dev,
-              "RX profile restore: MDMCFG1/2 -> 0x%02X/0x%02X (RPi profile, adaptive)\r\n",
-              CC1101_DBG_MDMCFG1_PROFILE, runtime_mdmcfg2);
-      TS_Delay_ms(2);
-   }
 
    // Czekaj na pierwszy bajt długości (dłuższe okno ogranicza restart RX)
    uint32_t timeout = TS_Get_ms() + 30000;
@@ -1121,18 +1106,10 @@ uint8_t CC1101_Debug_Rx(void)
 
    cc1101_read_burst_reg(CC1101_R_RX_FIFO, rxBuffer, packet_len + status_bytes);
 
-   char              ascii_payload[64 + 1];
-   static const char hex_chars[] = "0123456789ABCDEF";
-   char              hex_payload[(64 * 3) + 1];
+   char ascii_payload[64 + 1];
+   char hex_payload[(64 * 3) + 1];
 
-   for (uint8_t i = 0; i < packet_len; i++)
-   {
-      ascii_payload[i] = ((rxBuffer[i] >= 32u) && (rxBuffer[i] <= 126u)) ? (char) rxBuffer[i] : '.';
-      hex_payload[i * 3] = hex_chars[(rxBuffer[i] >> 4) & 0x0F];
-      hex_payload[(i * 3) + 1] = hex_chars[rxBuffer[i] & 0x0F];
-      hex_payload[(i * 3) + 2] = (i + 1u < packet_len) ? ' ' : '\0';
-   }
-   ascii_payload[packet_len] = '\0';
+   cc1101_format_payload(rxBuffer, packet_len, ascii_payload, hex_payload);
 
    if (status_bytes == 2)
    {
